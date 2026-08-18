@@ -1,6 +1,6 @@
 # AI Resume Studio
 
-> A full-stack, enterprise-grade AI resume builder and ATS optimization platform engineered with React 19, TypeScript, Express, Google Gemini, and Firebase.
+> A full-stack AI-powered resume builder and ATS optimization platform engineered with React 19, TypeScript, Express, Google Gemini, and Firebase.
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.0-61dafb.svg)](https://react.dev/)
@@ -93,7 +93,7 @@
 ```
 
 ### Architectural Highlights
-- **Unified Container Service**: In production, the Express backend serves the precompiled Vite single-page application from `dist/` and acts as the API gateway. This eliminates cross-origin latency, CORS misconfigurations, and multi-host deployment overhead.
+- **Unified Web Service**: In production, the Express backend serves the precompiled Vite single-page application from `dist/` and acts as the API gateway. This eliminates cross-origin latency, CORS misconfigurations, and multi-host deployment overhead.
 - **Client-Safe Secrets Isolation**: The `GEMINI_API_KEY` is strictly accessed in backend server routines via `process.env.GEMINI_API_KEY` and is never bundled into client JavaScript.
 
 ---
@@ -135,7 +135,7 @@ AI Resume Studio implements defensive prompt engineering to prevent generative A
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/ai-resume-studio.git
+git clone https://github.com/Shivanshu26-bit/ai-resume-studio.git
 cd ai-resume-studio
 ```
 
@@ -290,30 +290,36 @@ service cloud.firestore {
 
 ## 🚢 Production Deployment
 
-### Docker Deployment
-The project includes a production-ready, multi-stage `Dockerfile` executing under a non-root `node` user:
+The application is architected as a **unified Node.js/Express web service**. In production:
+1. The frontend is pre-built into static assets using `vite build` and placed in `dist/`.
+2. The Express server is compiled into `dist/server.cjs` using `esbuild`.
+3. When launched with `NODE_ENV=production`, Express directly serves the static frontend assets from `dist/`, handles Single-Page Application (SPA) client-side routing fallback, and responds to all `/api/*` endpoints on the same origin.
 
+### Building for Production
 ```bash
-# Build the Docker image
-docker build -t ai-resume-studio:latest .
+# 1. Build frontend and backend distribution bundles
+npm run build
 
-# Run the container locally
-docker run -p 3000:3000 -e GEMINI_API_KEY="your_api_key" -e NODE_ENV="production" ai-resume-studio:latest
+# 2. Start the compiled production server
+npm start
 ```
 
-### Deploy to Google Cloud Run
-```bash
-# 1. Submit build to Google Artifact Registry
-gcloud builds submit --tag gcr.io/[PROJECT_ID]/ai-resume-studio
+### Deployment Environments
+This single-service structure can be deployed to any modern cloud hosting platform or container environment, including:
+- **Container Services**: Docker / Podman containers using the provided multi-stage `Dockerfile`
+- **PaaS Platforms**: Render, Railway, Fly.io, Heroku, AWS App Runner
+- **Virtual Machines / Self-Hosted**: Ubuntu / Debian Linux with Node.js 20 and PM2 or systemd
 
-# 2. Deploy to Cloud Run with Secret Manager injection
-gcloud run deploy ai-resume-studio \
-  --image gcr.io/[PROJECT_ID]/ai-resume-studio \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --set-env-vars NODE_ENV=production \
-  --set-secrets GEMINI_API_KEY=GEMINI_API_KEY:latest
+#### Docker Container Execution
+```bash
+# Build the production container image
+docker build -t ai-resume-studio:latest .
+
+# Run the container with environment variables
+docker run -p 3000:3000 \
+  -e GEMINI_API_KEY="your_gemini_api_key" \
+  -e NODE_ENV="production" \
+  ai-resume-studio:latest
 ```
 
 ---
