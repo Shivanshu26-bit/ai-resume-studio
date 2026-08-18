@@ -23,7 +23,7 @@
 - [Environment Variables](#environment-variables)
 - [Backend API Reference](#backend-api-reference)
 - [Database & Security Rules](#database--security-rules)
-- [Production Deployment](#production-deployment)
+- [Production Deployment](#-production-deployment)
 - [Future Improvements](#future-improvements)
 - [License](#license)
 
@@ -109,7 +109,7 @@
 | **PDF Generation** | jsPDF, html2canvas | High-DPI canvas to multi-page A4 PDF compiler |
 | **Backend** | Express 4, Node.js 20 | REST API gateway and static bundle host |
 | **Build Tools** | Vite 6, esbuild, tsx | Ultra-fast TypeScript compilation and bundling |
-| **AI Model** | Google Gemini 3.7 Flash | High-speed structured content optimization |
+| **AI Model** | Google Gemini 3.7 Flash (`@google/genai`) | High-speed structured content optimization |
 | **Database** | Cloud Firestore | Real-time NoSQL cloud document storage |
 | **Authentication**| Firebase Authentication | Google OAuth 2.0 & Email/Password provider |
 | **Containerization** | Docker | Multi-stage Alpine container image |
@@ -288,12 +288,13 @@ service cloud.firestore {
 
 ---
 
-## 🚢 Production Deployment
+## 🚀 Production Deployment
 
-The application is architected as a **unified Node.js/Express web service**. In production:
-1. The frontend is pre-built into static assets using `vite build` and placed in `dist/`.
-2. The Express server is compiled into `dist/server.cjs` using `esbuild`.
-3. When launched with `NODE_ENV=production`, Express directly serves the static frontend assets from `dist/`, handles Single-Page Application (SPA) client-side routing fallback, and responds to all `/api/*` endpoints on the same origin.
+AI Resume Studio uses a unified React + Express architecture.
+
+The Vite frontend is compiled into the production `dist/` directory, while the Express server serves the frontend and handles the `/api/*` backend routes.
+
+The application can therefore be deployed to a Node.js-compatible web service that supports environment variables and long-running web applications.
 
 ### Building for Production
 ```bash
@@ -304,13 +305,7 @@ npm run build
 npm start
 ```
 
-### Deployment Environments
-This single-service structure can be deployed to any modern cloud hosting platform or container environment, including:
-- **Container Services**: Docker / Podman containers using the provided multi-stage `Dockerfile`
-- **PaaS Platforms**: Render, Railway, Fly.io, Heroku, AWS App Runner
-- **Virtual Machines / Self-Hosted**: Ubuntu / Debian Linux with Node.js 20 and PM2 or systemd
-
-#### Docker Container Execution
+### Docker Local Container Execution
 ```bash
 # Build the production container image
 docker build -t ai-resume-studio:latest .
