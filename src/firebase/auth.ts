@@ -56,6 +56,8 @@ export function formatAuthError(error: any): string {
       return "Too many unsuccessful attempts. Access has been temporarily disabled. Please try again later or reset your password.";
     case "auth/requires-recent-login":
       return "For your security, please sign in again before performing this action.";
+    case "auth/unauthorized-domain":
+      return "This domain is not authorized for OAuth operations. Please ensure this domain is added in Firebase Console -> Authentication -> Settings -> Authorized domains.";
     default:
       if (typeof error === "string") return error;
       if (error.message && !error.message.includes("Firebase:")) {

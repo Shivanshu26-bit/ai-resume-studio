@@ -18,15 +18,24 @@ const envDatabaseId = env.VITE_FIREBASE_FIRESTORE_DATABASE_ID;
 // Environment variables take strict priority over fallback JSON
 export const firebaseConfig = {
   apiKey: envApiKey || (fallbackJsonConfig as any).apiKey,
-  authDomain: envAuthDomain || (fallbackJsonConfig as any).authDomain,
-  projectId: envProjectId || (fallbackJsonConfig as any).projectId,
-  storageBucket: envStorageBucket || (fallbackJsonConfig as any).storageBucket,
+  authDomain: envAuthDomain || (fallbackJsonConfig as any).authDomain || "ai-resume-builder-106de.firebaseapp.com",
+  projectId: envProjectId || (fallbackJsonConfig as any).projectId || "ai-resume-builder-106de",
+  storageBucket: envStorageBucket || (fallbackJsonConfig as any).storageBucket || "ai-resume-builder-106de.firebasestorage.app",
   messagingSenderId: envMessagingSenderId || (fallbackJsonConfig as any).messagingSenderId,
   appId: envAppId || (fallbackJsonConfig as any).appId,
   firestoreDatabaseId: envDatabaseId !== undefined && envDatabaseId !== ""
     ? envDatabaseId
-    : (fallbackJsonConfig as any).firestoreDatabaseId,
+    : (fallbackJsonConfig as any).firestoreDatabaseId || "(default)",
 };
+
+// Safe diagnostic log: ONLY projectId, authDomain, and hostname (NEVER secrets or keys)
+if (typeof window !== "undefined") {
+  console.log("[Firebase Init Diagnostic]", {
+    projectId: firebaseConfig.projectId,
+    authDomain: firebaseConfig.authDomain,
+    hostname: window.location.hostname,
+  });
+}
 
 // Safe configuration validation without exposing secrets
 const missingKeys: string[] = [];
