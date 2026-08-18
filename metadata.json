@@ -1,0 +1,6 @@
+{
+  "name": "AI Resume Studio",
+  "description": "Production-style Android AI Resume Studio with ATS score analysis, intelligent keyword recommendations, step-by-step resume builder, and live A4 document preview.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

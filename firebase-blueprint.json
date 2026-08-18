@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile document stored at users/{userId}",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase User ID" },
+        "name": { "type": "string", "description": "Full name of the user" },
+        "displayName": { "type": "string", "description": "Display name of the user" },
+        "email": { "type": "string", "description": "User email address" },
+        "photoURL": { "type": "string", "description": "Profile picture URL" },
+        "avatarUrl": { "type": "string", "description": "Profile picture URL alias" },
+        "targetRole": { "type": "string", "description": "Target job role" },
+        "yearsOfExp": { "type": "number", "description": "Years of experience" },
+        "createdAt": { "type": "number", "description": "Timestamp of account creation" },
+        "updatedAt": { "type": "number", "description": "Timestamp of last profile update" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Resume": {
+      "title": "Resume",
+      "description": "Resume document stored in user subcollection at users/{userId}/resumes/{resumeId}",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique resume identifier" },
+        "title": { "type": "string", "description": "Resume document title" },
+        "targetRole": { "type": "string", "description": "Target position title" },
+        "lastEdited": { "type": "string", "description": "Human readable last edit time" },
+        "atsScore": { "type": "number", "description": "ATS Compatibility Score" },
+        "selectedTemplate": { "type": "string", "description": "Selected visual resume template identifier" },
+        "personal": { "type": "object", "description": "Personal contact and summary information" },
+        "experiences": { "type": "array", "description": "List of work experience entries" },
+        "education": { "type": "array", "description": "List of education items" },
+        "skills": { "type": "array", "description": "Array of technical & soft skill keywords" },
+        "projects": { "type": "array", "description": "List of featured portfolio projects" },
+        "certifications": { "type": "array", "description": "List of professional certifications" },
+        "achievements": { "type": "array", "description": "Key career accomplishments" },
+        "analysis": { "type": "object", "description": "Gemini AI ATS analysis results" },
+        "storagePdfUrl": { "type": "string", "description": "Firebase Storage URL for exported PDF" },
+        "storageResumeFileUrl": { "type": "string", "description": "Firebase Storage URL for uploaded original draft file" },
+        "createdAt": { "type": "number", "description": "Creation epoch timestamp" },
+        "updatedAt": { "type": "number", "description": "Last update epoch timestamp" }
+      },
+      "required": ["id", "title"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profile document with contact and role preferences"
+    },
+    "/users/{userId}/resumes/{resumeId}": {
+      "schema": { "$ref": "#/entities/Resume" },
+      "description": "User private resumes subcollection containing structured resume documents"
+    }
+  }
+}

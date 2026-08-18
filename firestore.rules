@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default-deny all collections to prevent unintended exposure
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions for authentication and zero-trust identity checks
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // User profile document: users/{userId}
+    // Only the authenticated owner can access, create, or update their own profile document.
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(userId);
+      allow update: if isOwner(userId) && isValidId(userId);
+      allow delete: if isOwner(userId) && isValidId(userId);
+
+      // Private resumes subcollection: users/{userId}/resumes/{resumeId}
+      // Only the authenticated owner can read, create, update, and delete their own resumes.
+      // Cross-user access and unauthenticated access are strictly prohibited.
+      match /resumes/{resumeId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(resumeId);
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(resumeId);
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(resumeId);
+      }
+    }
+  }
+}
+
