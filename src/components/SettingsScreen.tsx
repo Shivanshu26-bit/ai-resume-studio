@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { UserProfile, Resume } from "../types";
+import { UserProfile, Resume, BottomNavTab } from "../types";
 import { TopAppBar } from "./TopAppBar";
 import { uploadProfileAvatar } from "../firebase/storage";
 
@@ -10,6 +10,7 @@ interface SettingsScreenProps {
   onResetData: () => void;
   onLogout: () => void;
   onBack: () => void;
+  onTabChange?: (tab: BottomNavTab) => void;
 }
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
@@ -19,6 +20,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onResetData,
   onLogout,
   onBack,
+  onTabChange,
 }) => {
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
@@ -76,15 +78,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   return (
     <div className="min-h-screen w-full bg-[#f8fafc] pb-28 pt-16 flex flex-col items-center">
       <TopAppBar
-        title="Settings & Profile"
+        title="AI Resume Studio"
+        activeTab="settings"
+        onTabChange={onTabChange}
         showBack={true}
         onBackClick={onBack}
         onSettingsClick={() => {}}
       />
 
-      <main className="w-full max-w-xl px-4 py-5 flex flex-col gap-5">
+      <main className="w-full max-w-xl px-4 py-6 flex flex-col gap-5">
         {/* User Card with Storage Avatar Upload */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center gap-4">
+        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-xs flex items-center gap-4">
           <div className="relative group">
             <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-indigo-600 flex-shrink-0 shadow-xs bg-slate-100 flex items-center justify-center">
               {isUploadingAvatar ? (
@@ -130,8 +134,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </div>
 
         {/* AI Engine Status Card */}
-        <div className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 text-white rounded-2xl p-5 shadow-lg shadow-indigo-500/20 flex items-start gap-3.5">
-          <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-white flex-shrink-0 shadow-2xs">
+        <div className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 text-white rounded-3xl p-5 shadow-lg shadow-indigo-500/20 flex items-start gap-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center text-white flex-shrink-0 shadow-2xs">
             <span className="material-symbols-outlined text-[24px]">psychology</span>
           </div>
           <div className="flex-1">
@@ -146,37 +150,43 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </div>
 
         {/* Profile Edit Form */}
-        <form onSubmit={handleSave} className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex flex-col gap-3.5">
+        <form onSubmit={handleSave} className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col gap-4">
           <h3 className="text-[16px] font-bold text-slate-900">Profile Settings</h3>
 
-          <div className="m3-input-field">
+          <div>
+            <label className="block text-[12.5px] font-bold text-slate-800 mb-1">
+              Display Name
+            </label>
             <input
               type="text"
-              placeholder=" "
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
             />
-            <label>Display Name</label>
           </div>
 
-          <div className="m3-input-field">
+          <div>
+            <label className="block text-[12.5px] font-bold text-slate-800 mb-1">
+              Email Address
+            </label>
             <input
               type="email"
-              placeholder=" "
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
             />
-            <label>Email Address</label>
           </div>
 
-          <div className="m3-input-field">
+          <div>
+            <label className="block text-[12.5px] font-bold text-slate-800 mb-1">
+              Primary Target Role
+            </label>
             <input
               type="text"
-              placeholder=" "
               value={targetRole}
               onChange={(e) => setTargetRole(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
             />
-            <label>Primary Target Role</label>
           </div>
 
           <div className="flex justify-between items-center pt-2">
@@ -197,13 +207,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </form>
 
         {/* Data & Portfolio Actions */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex flex-col gap-3">
+        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col gap-3">
           <h3 className="text-[16px] font-bold text-slate-900">Data Management</h3>
 
           <button
             type="button"
             onClick={handleExportAllJson}
-            className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors text-left cursor-pointer"
+            className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 hover:bg-slate-50 transition-colors text-left cursor-pointer"
           >
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined text-indigo-600">download</span>
@@ -211,7 +221,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <span className="text-[14px] font-bold text-slate-900 block">
                   Export Resume Portfolio (JSON)
                 </span>
-                <span className="text-[11px] text-slate-500 font-medium">
+                <span className="text-[11.5px] text-slate-500 font-medium">
                   Download a full backup of your structured resume documents
                 </span>
               </div>
@@ -222,7 +232,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <button
             type="button"
             onClick={onResetData}
-            className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors text-left cursor-pointer"
+            className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 hover:bg-slate-50 transition-colors text-left cursor-pointer"
           >
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined text-amber-600">restart_alt</span>
@@ -230,7 +240,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <span className="text-[14px] font-bold text-slate-900 block">
                   Reset Sample Data
                 </span>
-                <span className="text-[11px] text-slate-500 font-medium">
+                <span className="text-[11.5px] text-slate-500 font-medium">
                   Restore default Senior Dev, Product Manager, and Startup resumes to Firestore
                 </span>
               </div>
@@ -252,4 +262,3 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     </div>
   );
 };
-

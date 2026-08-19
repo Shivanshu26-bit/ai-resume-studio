@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Resume, ResumeAnalysis, JobComparisonResult } from "../types";
+import { Resume, ResumeAnalysis, JobComparisonResult, BottomNavTab } from "../types";
 import { TopAppBar } from "./TopAppBar";
 
 interface AtsScannerScreenProps {
@@ -12,6 +12,7 @@ interface AtsScannerScreenProps {
   isExportingPdf?: boolean;
   onOpenSettings: () => void;
   onBackToDashboard: () => void;
+  onTabChange?: (tab: BottomNavTab) => void;
 }
 
 export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
@@ -24,6 +25,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
   isExportingPdf = false,
   onOpenSettings,
   onBackToDashboard,
+  onTabChange,
 }) => {
   const [selectedResumeId, setSelectedResumeId] = useState<string>(
     activeResume?.id || (resumes[0]?.id ?? "")
@@ -162,25 +164,27 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
     <div className="min-h-screen w-full bg-[#f8fafc] pb-28 pt-16 flex flex-col items-center">
       <TopAppBar
         title="AI Resume Studio"
+        activeTab="scanner"
+        onTabChange={onTabChange}
         showBack={true}
         onBackClick={onBackToDashboard}
         onSettingsClick={onOpenSettings}
       />
 
-      <main className="w-full max-w-4xl mx-auto px-4 py-5 flex flex-col gap-6">
+      <main className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col gap-6">
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="p-1.5 rounded-xl bg-indigo-100 text-indigo-700">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center border border-purple-100 shadow-2xs">
                 <span className="material-symbols-outlined text-[22px]">document_scanner</span>
-              </span>
+              </div>
               <h1 className="text-[24px] md:text-[28px] font-extrabold text-slate-900 tracking-tight">
-                ATS Scanner &amp; Matcher
+                ATS Resume Scanner
               </h1>
             </div>
             <p className="text-[14px] text-slate-600 mt-1">
-              Check how your resume matches target job descriptions and discover ATS improvements.
+              See how well your resume matches a target job.
             </p>
           </div>
 
@@ -188,7 +192,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
             <button
               id="ats-nav-to-builder-btn"
               onClick={() => onNavigateToBuilder(currentSelectedResume)}
-              className="bg-white border border-slate-300 hover:border-indigo-500 text-slate-700 hover:text-indigo-600 text-[13px] font-bold px-4 py-2 rounded-full flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+              className="bg-white border border-slate-300 hover:border-indigo-500 text-slate-700 hover:text-indigo-600 text-[13px] font-bold px-4 py-2 rounded-full flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
             >
               <span className="material-symbols-outlined text-[18px]">edit_document</span>
               Resume Builder
@@ -213,7 +217,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
         </div>
 
         {/* Scanner Input Panel */}
-        <section className="bg-white rounded-3xl p-5 md:p-6 border border-slate-200/80 shadow-xs flex flex-col gap-4">
+        <section className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col gap-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* 1. Select Resume */}
             <div>
@@ -297,14 +301,14 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
               <span className="material-symbols-outlined text-[16px] text-indigo-600">
                 verified_user
               </span>
-              <span>Guardrails active: factual verification without fabricated numbers</span>
+              <span>Factual guardrails: ATS keyword matching without hallucinated metrics</span>
             </div>
 
             <button
               id="run-ats-scan-main-btn"
               onClick={handleRunFullAtsScan}
               disabled={isScanning}
-              className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-[14px] px-7 py-3 rounded-full flex items-center justify-center gap-2 shadow-md shadow-indigo-500/25 active:scale-95 transition-all cursor-pointer"
+              className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold text-[14px] px-8 py-3 rounded-full flex items-center justify-center gap-2 shadow-md shadow-purple-500/25 active:scale-95 transition-all cursor-pointer"
             >
               {isScanning ? (
                 <>
@@ -325,7 +329,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
         {analysisResult && (
           <section className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
             {/* Score & Verdict Card */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-5">
                 {/* Circular Gauge */}
                 <div className="relative w-28 h-28 flex-shrink-0 flex items-center justify-center">
@@ -433,7 +437,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                     </span>
                     Matched Keywords &amp; Skills
                   </h4>
-                  <span className="text-[12px] font-mono text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  <span className="text-[12px] font-mono text-emerald-700 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                     {(jobComparison?.comparison?.matchedSkills?.length ||
                       analysisResult.presentKeywords?.length ||
                       currentSelectedResume.skills.length) + " found"}
@@ -470,7 +474,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                     </span>
                     Missing Recommended Keywords
                   </h4>
-                  <span className="text-[12px] font-mono text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                  <span className="text-[12px] font-mono text-amber-700 font-bold bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
                     {(jobComparison?.comparison?.missingSkills?.length ||
                       analysisResult.recommendedKeywords?.length ||
                       0) + " suggested"}
@@ -498,7 +502,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                         className={`text-[12px] font-mono font-medium px-3 py-1 rounded-full border transition-all flex items-center gap-1 cursor-pointer ${
                           isAlreadyAdded
                             ? "bg-emerald-50 text-emerald-800 border-emerald-300"
-                            : "bg-slate-50 hover:bg-indigo-50 text-indigo-700 border-slate-200 hover:border-indigo-300"
+                            : "bg-slate-50 hover:bg-purple-50 text-purple-700 border-slate-200 hover:border-purple-300"
                         }`}
                       >
                         <span className="material-symbols-outlined text-[14px]">
@@ -516,7 +520,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
             {analysisResult.insights && analysisResult.insights.length > 0 && (
               <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col gap-4">
                 <h4 className="text-[16px] font-bold text-slate-900 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-indigo-600 text-[22px]">
+                  <span className="material-symbols-outlined text-purple-600 text-[22px]">
                     lightbulb
                   </span>
                   Strategic ATS Alignment Recommendations
@@ -528,7 +532,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                       key={idx}
                       className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-start gap-3"
                     >
-                      <span className="p-2 rounded-xl bg-white text-indigo-600 shadow-xs border border-slate-100 flex-shrink-0">
+                      <span className="p-2 rounded-xl bg-white text-purple-600 shadow-2xs border border-slate-100 flex-shrink-0">
                         <span className="material-symbols-outlined text-[20px]">
                           {insight.type === "check"
                             ? "task_alt"
@@ -564,7 +568,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                 </h3>
                 <button
                   onClick={() => setShowRawSummaryModal(false)}
-                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px]">close</span>
                 </button>
@@ -577,13 +581,13 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   onClick={() => setShowRawSummaryModal(false)}
-                  className="px-4 py-2 rounded-full border border-slate-300 text-slate-700 text-[13px] font-bold"
+                  className="px-4 py-2 rounded-full border border-slate-300 text-slate-700 text-[13px] font-bold cursor-pointer"
                 >
                   Close
                 </button>
                 <button
                   onClick={handleApplyAIOptimizedSummary}
-                  className="px-5 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold shadow-md"
+                  className="px-5 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold shadow-md cursor-pointer"
                 >
                   Apply to Resume
                 </button>

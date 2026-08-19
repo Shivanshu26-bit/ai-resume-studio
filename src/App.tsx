@@ -397,6 +397,7 @@ function MainAppContent() {
             onViewAllHistory={() => setCurrentTab("history")}
             onOpenSettings={() => setCurrentTab("settings")}
             onExportPdf={handleExportPdf}
+            onTabChange={(tab) => setCurrentTab(tab)}
           />
         )}
 
@@ -415,6 +416,7 @@ function MainAppContent() {
             isExportingPdf={isExportingPdf}
             onBack={() => setCurrentTab("home")}
             onOpenSettings={() => setCurrentTab("settings")}
+            onTabChange={(tab) => setCurrentTab(tab)}
           />
         )}
 
@@ -432,6 +434,7 @@ function MainAppContent() {
             isExportingPdf={isExportingPdf}
             onOpenSettings={() => setCurrentTab("settings")}
             onBackToDashboard={() => setCurrentTab("home")}
+            onTabChange={(tab) => setCurrentTab(tab)}
           />
         )}
 
@@ -446,6 +449,7 @@ function MainAppContent() {
             onExportPdf={handleExportPdf}
             exportingResumeId={exportingResumeId}
             onOpenSettings={() => setCurrentTab("settings")}
+            onTabChange={(tab) => setCurrentTab(tab)}
           />
         )}
 
@@ -457,6 +461,7 @@ function MainAppContent() {
             onResetData={handleResetData}
             onLogout={handleLogout}
             onBack={() => setCurrentTab("home")}
+            onTabChange={(tab) => setCurrentTab(tab)}
           />
         )}
 

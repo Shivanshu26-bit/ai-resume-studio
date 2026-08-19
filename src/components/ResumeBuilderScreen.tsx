@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Resume, WorkExperience, EducationItem, ProjectItem } from "../types";
+import { Resume, WorkExperience, EducationItem, ProjectItem, BottomNavTab } from "../types";
 import { TopAppBar } from "./TopAppBar";
 import { demoAlexChenData } from "../data/mockResumes";
 import { ResumeDocument } from "./ResumeDocument";
@@ -7,6 +7,8 @@ import { JobMatcherModal } from "./JobMatcherModal";
 import { SummaryAiModal } from "./SummaryAiModal";
 import { BulletEnhancerModal } from "./BulletEnhancerModal";
 import { ProjectEnhancerModal } from "./ProjectEnhancerModal";
+
+type BuilderSectionId = "personal" | "summary" | "experience" | "projects" | "education" | "skills" | "templates";
 
 interface ResumeBuilderScreenProps {
   resume: Resume;
@@ -19,6 +21,7 @@ interface ResumeBuilderScreenProps {
   isExportingPdf?: boolean;
   onBack: () => void;
   onOpenSettings: () => void;
+  onTabChange?: (tab: BottomNavTab) => void;
 }
 
 export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
@@ -32,8 +35,9 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
   isExportingPdf = false,
   onBack,
   onOpenSettings,
+  onTabChange,
 }) => {
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [activeSection, setActiveSection] = useState<BuilderSectionId>("personal");
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [saveSuccessNotice, setSaveSuccessNotice] = useState(false);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
@@ -162,7 +166,7 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
       startDate: "",
       endDate: "",
       current: true,
-      bullets: ["Contributed to core application development and collaborated on feature implementation."],
+      bullets: ["Contributed to core product features and collaborated with cross-functional teams to deliver milestones."],
     };
     onChange({ ...resume, experiences: [newExp, ...resume.experiences] });
   };
@@ -192,6 +196,24 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
     });
   };
 
+  const handleAddEducation = () => {
+    const newEdu: EducationItem = {
+      id: "edu-" + Date.now(),
+      degree: "B.S. in Computer Science",
+      school: "University",
+      location: "City, State",
+      year: "2024",
+    };
+    onChange({ ...resume, education: [...resume.education, newEdu] });
+  };
+
+  const handleRemoveEducation = (id: string) => {
+    onChange({
+      ...resume,
+      education: resume.education.filter((e) => e.id !== id),
+    });
+  };
+
   const handleAddSkill = (skill: string) => {
     const trimmed = skill.trim();
     if (trimmed && !resume.skills.includes(trimmed)) {
@@ -207,35 +229,82 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
     });
   };
 
-  const stepTitles = {
-    1: "Personal Info",
-    2: "Experience & Projects",
-    3: "Skills & Education",
-  };
+  const sectionsList: Array<{ id: BuilderSectionId; label: string; icon: string; count?: number }> = [
+    { id: "personal", label: "Personal Info", icon: "person" },
+    { id: "summary", label: "Summary", icon: "short_text" },
+    { id: "experience", label: "Experience", icon: "work", count: resume.experiences?.length },
+    { id: "projects", label: "Projects", icon: "code", count: resume.projects?.length },
+    { id: "education", label: "Education", icon: "school", count: resume.education?.length },
+    { id: "skills", label: "Skills", icon: "psychology", count: resume.skills?.length },
+    { id: "templates", label: "Templates", icon: "palette" },
+  ];
+
+  const templates = [
+    {
+      id: "modern",
+      name: "Modern",
+      desc: "Clean typography with subtle indigo accents and high ATS readability.",
+      badge: "Most Popular",
+    },
+    {
+      id: "classic",
+      name: "Classic",
+      desc: "Traditional serif styling, formal dividers, and time-tested formatting.",
+      badge: "Traditional",
+    },
+    {
+      id: "minimal",
+      name: "Minimal",
+      desc: "Understated hierarchy, generous margins, and maximum content clarity.",
+      badge: "Clean",
+    },
+    {
+      id: "executive",
+      name: "Executive",
+      desc: "Two-column layout highlighting key competencies, leadership, and summary.",
+      badge: "Senior / Exec",
+    },
+  ];
 
   return (
     <div className="min-h-screen w-full bg-[#f8fafc] pb-28 pt-16 flex flex-col">
       <TopAppBar
         title="AI Resume Studio"
+        activeTab="builder"
+        onTabChange={onTabChange}
         showBack={true}
         onBackClick={onBack}
         onSettingsClick={onOpenSettings}
       />
 
-      <main className="w-full max-w-6xl mx-auto px-4 py-5 flex flex-col lg:flex-row gap-6">
-        {/* Left Column: Multi-step Form Area */}
+      {/* Main Workspace Layout */}
+      <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col lg:flex-row gap-6">
+        {/* Left Column (Desktop Section Sidebar + Form Area) */}
         <div className="w-full lg:w-7/12 flex flex-col gap-4">
-          {/* Firestore Sync & Top Actions Toolbar */}
-          <div className="flex items-center justify-between px-2 text-[12px] flex-wrap gap-2">
+          {/* Top Status & AI Action Bar */}
+          <div className="bg-white rounded-2xl p-3 sm:px-4 border border-slate-200/80 shadow-2xs flex flex-wrap items-center justify-between gap-3">
+            {/* Status & Cloud Sync */}
             <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${isSaving ? "bg-amber-400 animate-ping" : "bg-emerald-500"}`} />
-              <span className="font-mono text-slate-500">
-                {isSaving ? "Saving to Cloud Firestore..." : saveSuccessNotice ? "Saved to Cloud Firestore ✓" : "Cloud Sync Active"}
+              <span className={`w-2.5 h-2.5 rounded-full ${isSaving ? "bg-amber-400 animate-ping" : "bg-emerald-500"}`} />
+              <span className="text-[12px] font-mono text-slate-600 font-semibold">
+                {isSaving ? "Saving to Firestore..." : saveSuccessNotice ? "Saved to Cloud Firestore ✓" : "Cloud Sync Active"}
               </span>
             </div>
 
+            {/* Top Toolbar Actions */}
             <div className="flex items-center gap-2">
-              {/* Dedicated ATS Scanner / Check ATS Score Trigger */}
+              {/* Match Job Description Trigger */}
+              <button
+                type="button"
+                id="open-job-matcher-btn"
+                onClick={() => setIsJobMatcherOpen(true)}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-[12px] border border-purple-200 transition-all cursor-pointer shadow-2xs active:scale-95"
+              >
+                <span className="material-symbols-outlined text-[16px]">target</span>
+                <span>Match Job Post</span>
+              </button>
+
+              {/* Check ATS Score Button */}
               <button
                 type="button"
                 id="check-ats-score-btn"
@@ -246,132 +315,121 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
                     onRunAnalysis(resume);
                   }
                 }}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-[12px] border border-purple-200 transition-all cursor-pointer shadow-2xs active:scale-95"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[12px] border border-indigo-200 transition-all cursor-pointer shadow-2xs active:scale-95"
               >
                 <span className="material-symbols-outlined text-[16px]">document_scanner</span>
-                Check ATS Score
+                <span>Check ATS Score</span>
               </button>
 
+              {/* Save Resume Button */}
               <button
                 type="button"
                 id="save-resume-cloud-btn"
                 onClick={handleManualSave}
                 disabled={isSaving}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-indigo-50 text-indigo-700 font-bold text-[12px] border border-slate-200 hover:border-indigo-300 transition-all cursor-pointer shadow-2xs active:scale-95"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-[12px] transition-all cursor-pointer shadow-2xs active:scale-95"
               >
-                <span className="material-symbols-outlined text-[16px]">
+                <span className="material-symbols-outlined text-[15px]">
                   {saveSuccessNotice ? "check" : isSaving ? "sync" : "cloud_upload"}
                 </span>
-                {isSaving ? "Saving..." : saveSuccessNotice ? "Saved!" : "Save Changes"}
+                <span>{isSaving ? "Saving..." : saveSuccessNotice ? "Saved!" : "Save"}</span>
               </button>
             </div>
           </div>
 
-          {/* Stepper Card */}
-          <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/80">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[12px] font-bold text-indigo-700 uppercase tracking-wider font-mono">
-                Step {currentStep} of 3
-              </span>
-              <span className="text-[13px] font-semibold text-slate-600">
-                {stepTitles[currentStep]}
-              </span>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="w-full bg-slate-100 rounded-full h-1.5 mb-5 overflow-hidden">
-              <div
-                className="bg-indigo-600 h-full rounded-full transition-all duration-400"
-                style={{ width: `${(currentStep / 3) * 100}%` }}
-              />
-            </div>
-
-            {/* Stepper Buttons */}
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { step: 1, label: "Personal", icon: "person" },
-                { step: 2, label: "Experience", icon: "work" },
-                { step: 3, label: "Skills", icon: "psychology" },
-              ].map(({ step, label }) => {
-                const isActive = currentStep === step;
-                const isPassed = currentStep > step;
-                return (
-                  <button
-                    key={step}
-                    id={`builder-step-tab-${step}`}
-                    type="button"
-                    onClick={() => setCurrentStep(step as 1 | 2 | 3)}
-                    className="flex flex-col items-center group cursor-pointer"
-                  >
-                    <div
-                      className={`w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold mb-1 transition-all ${
-                        isActive
-                          ? "bg-indigo-600 text-white shadow-xs scale-110"
-                          : isPassed
-                          ? "bg-indigo-100 text-indigo-700 font-bold"
-                          : "bg-slate-100 text-slate-400"
-                      }`}
-                    >
-                      {isPassed ? "✓" : step}
-                    </div>
+          {/* Section Navigation Tabs (Horizontal Scrollable Pills) */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+            {sectionsList.map((sec) => {
+              const isActive = activeSection === sec.id;
+              return (
+                <button
+                  key={sec.id}
+                  id={`section-tab-${sec.id}`}
+                  onClick={() => setActiveSection(sec.id)}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12.5px] font-semibold whitespace-nowrap transition-all cursor-pointer border ${
+                    isActive
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-xs font-bold"
+                      : "bg-white text-slate-700 border-slate-200/90 hover:bg-slate-50 hover:border-slate-300"
+                  }`}
+                >
+                  <span className={`material-symbols-outlined text-[16px] ${isActive ? "text-white" : "text-slate-400"}`}>
+                    {sec.icon}
+                  </span>
+                  <span>{sec.label}</span>
+                  {typeof sec.count === "number" && (
                     <span
-                      className={`text-[12px] ${
-                        isActive
-                          ? "font-bold text-indigo-700"
-                          : "text-slate-500 group-hover:text-slate-800"
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                        isActive ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
                       }`}
                     >
-                      {label}
+                      {sec.count}
                     </span>
-                  </button>
-                );
-              })}
-            </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
-          {/* AI Contextual Assistant Banner */}
-          <div className="bg-gradient-to-r from-indigo-50/90 via-purple-50/70 to-emerald-50/50 rounded-2xl p-4 md:p-5 shadow-xs border border-indigo-100 relative overflow-hidden flex items-start gap-3.5">
-            <div className="w-1.5 absolute left-0 top-0 bottom-0 bg-indigo-600" />
-            <div className="w-9 h-9 rounded-xl bg-white shadow-xs flex items-center justify-center text-indigo-600 flex-shrink-0 mt-0.5 border border-indigo-100">
-              <span
-                className="material-symbols-outlined text-[20px]"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                auto_awesome
-              </span>
-            </div>
-            <div className="flex-1">
-              <h4 className="text-[15px] font-bold text-indigo-900 mb-0.5">
-                AI Assistant Ready
-              </h4>
-              <p className="text-[13px] text-slate-600 leading-relaxed">
-                {currentStep === 1
-                  ? "I can help generate a professional summary based on your experience later. For now, let's get the basics down."
-                  : currentStep === 2
-                  ? "Quantify achievements using metrics and percentages. Tap the ✨ Enhance button on any bullet for instant ATS optimization."
-                  : "Include both core technical competencies and specialized tools like Kotlin, Compose, and Hilt to maximize your ATS match score."}
-              </p>
-            </div>
-          </div>
+          {/* Form Content Cards */}
+          <div className="flex flex-col gap-4">
+            {/* 1. PERSONAL INFO SECTION */}
+            {activeSection === "personal" && (
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col gap-5">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div>
+                    <h3 className="text-[17px] font-bold text-slate-900 tracking-tight">
+                      Personal &amp; Contact Details
+                    </h3>
+                    <p className="text-[12.5px] text-slate-500 mt-0.5">
+                      Ensure your contact information is accurate for recruiters and ATS parsers.
+                    </p>
+                  </div>
 
-          {/* Form Content Card */}
-          <div className="bg-white rounded-2xl p-5 md:p-6 shadow-xs border border-slate-200/80 flex flex-col gap-4">
-            {/* STEP 1: Personal Details */}
-            {currentStep === 1 && (
-              <div className="flex flex-col gap-4">
-                <div className="flex justify-between items-center mb-1">
-                  <h2 className="text-[18px] font-bold text-slate-900">
-                    Personal Details
-                  </h2>
-                  <span className="text-[12px] text-slate-400 font-mono">Step 1/3</span>
+                  {/* Sample Autofill Toggle */}
+                  <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200">
+                    <input
+                      type="checkbox"
+                      checked={isDemoMode}
+                      onChange={handleDemoToggle}
+                      className="w-3.5 h-3.5 text-indigo-600 rounded-sm focus:ring-indigo-500 cursor-pointer"
+                    />
+                    <span className="text-[11.5px] font-mono font-semibold text-slate-700">Autofill Demo Data</span>
+                  </label>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="m3-input-field">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[12.5px] font-bold text-slate-800 mb-1.5">
+                      Resume Title / Label:
+                    </label>
                     <input
-                      id="firstName"
                       type="text"
-                      placeholder=" "
+                      value={resume.title}
+                      onChange={(e) => onChange({ ...resume, title: e.target.value })}
+                      placeholder="e.g. Senior Android Engineer Resume"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[12.5px] font-bold text-slate-800 mb-1.5">
+                      Target Role / Header:
+                    </label>
+                    <input
+                      type="text"
+                      value={resume.targetRole}
+                      onChange={(e) => onChange({ ...resume, targetRole: e.target.value })}
+                      placeholder="e.g. Senior Software Engineer"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[12.5px] font-bold text-slate-800 mb-1.5">
+                      First Name:
+                    </label>
+                    <input
+                      type="text"
                       value={resume.personal.firstName}
                       onChange={(e) =>
                         onChange({
@@ -379,15 +437,16 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
                           personal: { ...resume.personal, firstName: e.target.value },
                         })
                       }
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                     />
-                    <label htmlFor="firstName">First Name</label>
                   </div>
 
-                  <div className="m3-input-field">
+                  <div>
+                    <label className="block text-[12.5px] font-bold text-slate-800 mb-1.5">
+                      Last Name:
+                    </label>
                     <input
-                      id="lastName"
                       type="text"
-                      placeholder=" "
                       value={resume.personal.lastName}
                       onChange={(e) =>
                         onChange({
@@ -395,34 +454,16 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
                           personal: { ...resume.personal, lastName: e.target.value },
                         })
                       }
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                     />
-                    <label htmlFor="lastName">Last Name</label>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="m3-input-field">
-                    <input
-                      id="targetRole"
-                      type="text"
-                      placeholder=" "
-                      value={resume.targetRole}
-                      onChange={(e) =>
-                        onChange({
-                          ...resume,
-                          targetRole: e.target.value,
-                          title: e.target.value ? `${e.target.value} Resume` : resume.title,
-                        })
-                      }
-                    />
-                    <label htmlFor="targetRole">Target Job Title</label>
                   </div>
 
-                  <div className="m3-input-field">
+                  <div>
+                    <label className="block text-[12.5px] font-bold text-slate-800 mb-1.5">
+                      Email Address:
+                    </label>
                     <input
-                      id="email"
                       type="email"
-                      placeholder=" "
                       value={resume.personal.email}
                       onChange={(e) =>
                         onChange({
@@ -430,17 +471,16 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
                           personal: { ...resume.personal, email: e.target.value },
                         })
                       }
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                     />
-                    <label htmlFor="email">Email Address</label>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="m3-input-field">
+                  <div>
+                    <label className="block text-[12.5px] font-bold text-slate-800 mb-1.5">
+                      Phone Number:
+                    </label>
                     <input
-                      id="phone"
-                      type="tel"
-                      placeholder=" "
+                      type="text"
                       value={resume.personal.phone}
                       onChange={(e) =>
                         onChange({
@@ -448,15 +488,16 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
                           personal: { ...resume.personal, phone: e.target.value },
                         })
                       }
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                     />
-                    <label htmlFor="phone">Phone Number</label>
                   </div>
 
-                  <div className="m3-input-field">
+                  <div>
+                    <label className="block text-[12.5px] font-bold text-slate-800 mb-1.5">
+                      Location (City, State / Country):
+                    </label>
                     <input
-                      id="location"
                       type="text"
-                      placeholder=" "
                       value={resume.personal.location}
                       onChange={(e) =>
                         onChange({
@@ -464,520 +505,704 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
                           personal: { ...resume.personal, location: e.target.value },
                         })
                       }
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                     />
-                    <label htmlFor="location">Location (City, State)</label>
                   </div>
-                </div>
 
-                <div className="m3-input-field">
-                  <input
-                    id="linkedin"
-                    type="url"
-                    placeholder=" "
-                    value={resume.personal.linkedin}
-                    onChange={(e) =>
-                      onChange({
-                        ...resume,
-                        personal: { ...resume.personal, linkedin: e.target.value },
-                      })
-                    }
-                  />
-                  <label htmlFor="linkedin">LinkedIn Profile URL</label>
-                </div>
-
-                <div className="m3-input-field relative">
-                  <textarea
-                    id="summary"
-                    rows={4}
-                    placeholder=" "
-                    value={resume.personal.summary}
-                    onChange={(e) =>
-                      onChange({
-                        ...resume,
-                        personal: { ...resume.personal, summary: e.target.value },
-                      })
-                    }
-                  />
-                  <label htmlFor="summary">Professional Summary</label>
-
-                  <button
-                    id="generate-summary-ai-btn"
-                    type="button"
-                    onClick={() => setIsSummaryModalOpen(true)}
-                    title="Generate / Optimize with AI"
-                    className="absolute bottom-2.5 right-2.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-full shadow-xs transition-all active:scale-95 flex items-center gap-1 text-[12px] font-bold cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">
-                      auto_awesome
-                    </span>
-                    AI Assistant
-                  </button>
+                  <div>
+                    <label className="block text-[12.5px] font-bold text-slate-800 mb-1.5">
+                      LinkedIn / Portfolio URL:
+                    </label>
+                    <input
+                      type="text"
+                      value={resume.personal.linkedin || ""}
+                      onChange={(e) =>
+                        onChange({
+                          ...resume,
+                          personal: { ...resume.personal, linkedin: e.target.value },
+                        })
+                      }
+                      placeholder="linkedin.com/in/yourprofile"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
+                    />
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* STEP 2: Work Experience & Projects */}
-            {currentStep === 2 && (
-              <div className="flex flex-col gap-6">
-                {/* Work Experience Section */}
-                <div className="flex flex-col gap-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h2 className="text-[18px] font-bold text-slate-900">
-                        Work Experience
-                      </h2>
-                      <p className="text-[13px] text-slate-600">
-                        Add professional roles with key accomplishments.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      id="add-experience-btn"
-                      onClick={handleAddExperience}
-                      className="bg-indigo-50 text-indigo-700 font-bold text-[13px] px-3.5 py-1.5 rounded-full flex items-center gap-1 hover:bg-indigo-100 transition-colors shadow-2xs border border-indigo-200/60 cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">add</span>
-                      Add Role
-                    </button>
+            {/* 2. SUMMARY SECTION */}
+            {activeSection === "summary" && (
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                  <div>
+                    <h3 className="text-[17px] font-bold text-slate-900 tracking-tight">
+                      Professional Summary
+                    </h3>
+                    <p className="text-[12.5px] text-slate-500 mt-0.5">
+                      A concise 2-4 sentence overview of your career impact and core strengths.
+                    </p>
                   </div>
 
-                  {resume.experiences.map((exp, expIdx) => (
-                    <div
-                      key={exp.id}
-                      className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-4 flex flex-col gap-3 relative"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-[12px] font-bold font-mono text-indigo-700">
-                          Role #{expIdx + 1}
-                        </span>
-                        {resume.experiences.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveExperience(exp.id)}
-                            className="text-rose-600 hover:bg-rose-50 p-1 rounded-md text-[12px] flex items-center gap-1 font-semibold cursor-pointer"
-                          >
-                            <span className="material-symbols-outlined text-[16px]">delete</span>
-                            Remove
-                          </button>
-                        )}
+                  {/* AI Generate Summary Action */}
+                  <button
+                    type="button"
+                    id="open-summary-ai-btn"
+                    onClick={() => setIsSummaryModalOpen(true)}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[12px] border border-indigo-200 transition-all cursor-pointer self-start sm:self-auto shadow-2xs active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
+                    <span>Generate with AI</span>
+                  </button>
+                </div>
+
+                <textarea
+                  rows={6}
+                  value={resume.personal.summary || ""}
+                  onChange={(e) =>
+                    onChange({
+                      ...resume,
+                      personal: { ...resume.personal, summary: e.target.value },
+                    })
+                  }
+                  placeholder="e.g. Results-driven Software Engineer with 4+ years of experience in architecting scalable mobile and web applications..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-[13.5px] text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 leading-relaxed font-sans"
+                />
+              </div>
+            )}
+
+            {/* 3. WORK EXPERIENCE SECTION */}
+            {activeSection === "experience" && (
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between px-1">
+                  <div>
+                    <h3 className="text-[17px] font-bold text-slate-900 tracking-tight">
+                      Work Experience
+                    </h3>
+                    <p className="text-[12.5px] text-slate-500 mt-0.5">
+                      Highlight your accomplishments with quantifiable, action-oriented bullet points.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAddExperience}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-[12.5px] font-bold px-3.5 py-1.5 rounded-full flex items-center gap-1 shadow-xs cursor-pointer active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">add</span>
+                    Add Job
+                  </button>
+                </div>
+
+                {resume.experiences.map((exp, expIdx) => (
+                  <div
+                    key={exp.id}
+                    className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-xs flex flex-col gap-4 relative"
+                  >
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      <span className="text-[13px] font-mono font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full">
+                        Position #{expIdx + 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveExperience(exp.id)}
+                        className="text-slate-400 hover:text-rose-600 p-1 rounded-full transition-colors cursor-pointer"
+                        title="Remove Job"
+                      >
+                        <span className="material-symbols-outlined text-[20px]">delete</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[12px] font-bold text-slate-700 mb-1">
+                          Job Title:
+                        </label>
+                        <input
+                          type="text"
+                          value={exp.title}
+                          onChange={(e) => {
+                            const updated = [...resume.experiences];
+                            updated[expIdx] = { ...exp, title: e.target.value };
+                            onChange({ ...resume, experiences: updated });
+                          }}
+                          placeholder="e.g. Senior Mobile Engineer"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600"
+                        />
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div className="m3-input-field">
-                          <input
-                            type="text"
-                            placeholder=" "
-                            value={exp.title}
-                            onChange={(e) => {
-                              const updated = [...resume.experiences];
-                              updated[expIdx].title = e.target.value;
-                              onChange({ ...resume, experiences: updated });
-                            }}
-                          />
-                          <label>Job Title</label>
-                        </div>
-
-                        <div className="m3-input-field">
-                          <input
-                            type="text"
-                            placeholder=" "
-                            value={exp.company}
-                            onChange={(e) => {
-                              const updated = [...resume.experiences];
-                              updated[expIdx].company = e.target.value;
-                              onChange({ ...resume, experiences: updated });
-                            }}
-                          />
-                          <label>Company</label>
-                        </div>
+                      <div>
+                        <label className="block text-[12px] font-bold text-slate-700 mb-1">
+                          Company Name:
+                        </label>
+                        <input
+                          type="text"
+                          value={exp.company}
+                          onChange={(e) => {
+                            const updated = [...resume.experiences];
+                            updated[expIdx] = { ...exp, company: e.target.value };
+                            onChange({ ...resume, experiences: updated });
+                          }}
+                          placeholder="e.g. Acme Corporation"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600"
+                        />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="m3-input-field">
+                      <div>
+                        <label className="block text-[12px] font-bold text-slate-700 mb-1">
+                          Location:
+                        </label>
+                        <input
+                          type="text"
+                          value={exp.location}
+                          onChange={(e) => {
+                            const updated = [...resume.experiences];
+                            updated[expIdx] = { ...exp, location: e.target.value };
+                            onChange({ ...resume, experiences: updated });
+                          }}
+                          placeholder="e.g. San Francisco, CA (or Remote)"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[12px] font-bold text-slate-700 mb-1">
+                            Start Date:
+                          </label>
                           <input
                             type="text"
-                            placeholder=" "
                             value={exp.startDate}
                             onChange={(e) => {
                               const updated = [...resume.experiences];
-                              updated[expIdx].startDate = e.target.value;
+                              updated[expIdx] = { ...exp, startDate: e.target.value };
                               onChange({ ...resume, experiences: updated });
                             }}
+                            placeholder="e.g. 2021"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600"
                           />
-                          <label>Start Date</label>
                         </div>
 
-                        <div className="m3-input-field">
+                        <div>
+                          <label className="block text-[12px] font-bold text-slate-700 mb-1">
+                            End Date:
+                          </label>
                           <input
                             type="text"
-                            placeholder=" "
                             value={exp.endDate}
                             onChange={(e) => {
                               const updated = [...resume.experiences];
-                              updated[expIdx].endDate = e.target.value;
+                              updated[expIdx] = { ...exp, endDate: e.target.value };
                               onChange({ ...resume, experiences: updated });
                             }}
+                            placeholder="e.g. Present"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600"
                           />
-                          <label>End Date</label>
                         </div>
                       </div>
+                    </div>
 
-                      {/* Experience Bullets */}
-                      <div className="flex flex-col gap-2 mt-1">
-                        <label className="text-[12px] font-semibold text-slate-500 uppercase tracking-wider font-mono">
-                          Key Accomplishments & Bullets
+                    {/* Bullet Points with AI Enhance Button */}
+                    <div className="flex flex-col gap-2.5 pt-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[12px] font-bold text-slate-800">
+                          Accomplishment Bullets:
                         </label>
-                        {exp.bullets.map((bullet, bIdx) => (
-                          <div key={bIdx} className="flex gap-2 items-center">
-                            <span className="text-indigo-600 font-bold text-[14px]">•</span>
-                            <div className="flex-1 m3-input-field">
-                              <input
-                                type="text"
-                                placeholder="Accomplished [X] as measured by [Y] by doing [Z]"
-                                value={bullet}
-                                onChange={(e) => {
-                                  const updated = [...resume.experiences];
-                                  updated[expIdx].bullets[bIdx] = e.target.value;
-                                  onChange({ ...resume, experiences: updated });
-                                }}
-                              />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handleOpenBulletModal(exp.id, bIdx, bullet)}
-                              title="Enhance bullet with AI"
-                              className="bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold px-2.5 py-2 rounded-xl flex items-center gap-1 flex-shrink-0 transition-all active:scale-95 shadow-xs cursor-pointer"
-                            >
-                              <span className="material-symbols-outlined text-[14px]">
-                                auto_awesome
-                              </span>
-                              AI
-                            </button>
-                          </div>
-                        ))}
-
                         <button
                           type="button"
                           onClick={() => {
                             const updated = [...resume.experiences];
-                            updated[expIdx].bullets.push("");
+                            updated[expIdx] = {
+                              ...exp,
+                              bullets: [...exp.bullets, "New impactful contribution with measurable metrics."],
+                            };
                             onChange({ ...resume, experiences: updated });
                           }}
-                          className="text-[12px] text-indigo-600 font-bold flex items-center gap-1 self-start mt-1 hover:underline cursor-pointer"
+                          className="text-[11.5px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-0.5 cursor-pointer"
                         >
-                          <span className="material-symbols-outlined text-[16px]">add</span>
-                          Add bullet
+                          <span className="material-symbols-outlined text-[15px]">add</span>
+                          Add Bullet
                         </button>
                       </div>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Projects Section */}
-                <div className="flex flex-col gap-4 border-t border-slate-200 pt-5">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h2 className="text-[18px] font-bold text-slate-900">
-                        Key Projects & Portfolios
-                      </h2>
-                      <p className="text-[13px] text-slate-600">
-                        Highlight personal apps, open source contributions, or client deliverables.
-                      </p>
+                      {exp.bullets.map((bullet, bIdx) => (
+                        <div key={bIdx} className="flex items-start gap-2">
+                          <textarea
+                            rows={2}
+                            value={bullet}
+                            onChange={(e) => {
+                              const updatedBullets = [...exp.bullets];
+                              updatedBullets[bIdx] = e.target.value;
+                              const updated = [...resume.experiences];
+                              updated[expIdx] = { ...exp, bullets: updatedBullets };
+                              onChange({ ...resume, experiences: updated });
+                            }}
+                            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-[13px] text-slate-900 focus:outline-hidden focus:border-indigo-600 leading-relaxed font-sans"
+                          />
+
+                          {/* AI Bullet Enhancer Trigger */}
+                          <button
+                            type="button"
+                            title="Improve with AI (STAR Method)"
+                            onClick={() => handleOpenBulletModal(exp.id, bIdx, bullet)}
+                            className="p-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200/80 transition-colors cursor-pointer shadow-2xs flex-shrink-0"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
+                          </button>
+
+                          {/* Remove Bullet */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updatedBullets = exp.bullets.filter((_, i) => i !== bIdx);
+                              const updated = [...resume.experiences];
+                              updated[expIdx] = { ...exp, bullets: updatedBullets };
+                              onChange({ ...resume, experiences: updated });
+                            }}
+                            className="p-2 rounded-xl text-slate-400 hover:text-rose-600 transition-colors cursor-pointer flex-shrink-0"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">close</span>
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                    <button
-                      type="button"
-                      id="add-project-btn"
-                      onClick={handleAddProject}
-                      className="bg-purple-50 text-purple-700 font-bold text-[13px] px-3.5 py-1.5 rounded-full flex items-center gap-1 hover:bg-purple-100 transition-colors shadow-2xs border border-purple-200/60 cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">add</span>
-                      Add Project
-                    </button>
                   </div>
-
-                  {(resume.projects || []).map((proj, pIdx) => (
-                    <div
-                      key={proj.id || pIdx}
-                      className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-4 flex flex-col gap-3 relative"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-[12px] font-bold font-mono text-purple-700">
-                          Project #{pIdx + 1}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveProject(proj.id)}
-                          className="text-rose-600 hover:bg-rose-50 p-1 rounded-md text-[12px] flex items-center gap-1 font-semibold cursor-pointer"
-                        >
-                          <span className="material-symbols-outlined text-[16px]">delete</span>
-                          Remove
-                        </button>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div className="m3-input-field">
-                          <input
-                            type="text"
-                            placeholder=" "
-                            value={proj.title}
-                            onChange={(e) => {
-                              const updated = [...(resume.projects || [])];
-                              updated[pIdx].title = e.target.value;
-                              onChange({ ...resume, projects: updated });
-                            }}
-                          />
-                          <label>Project Title / Name</label>
-                        </div>
-
-                        <div className="m3-input-field">
-                          <input
-                            type="url"
-                            placeholder=" "
-                            value={proj.link || ""}
-                            onChange={(e) => {
-                              const updated = [...(resume.projects || [])];
-                              updated[pIdx].link = e.target.value;
-                              onChange({ ...resume, projects: updated });
-                            }}
-                          />
-                          <label>Project Link / GitHub URL</label>
-                        </div>
-                      </div>
-
-                      <div className="m3-input-field relative">
-                        <textarea
-                          rows={2}
-                          placeholder=" "
-                          value={proj.description}
-                          onChange={(e) => {
-                            const updated = [...(resume.projects || [])];
-                            updated[pIdx].description = e.target.value;
-                            onChange({ ...resume, projects: updated });
-                          }}
-                        />
-                        <label>Description & Tech Architecture</label>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setProjectModalData({
-                              isOpen: true,
-                              projectIndex: pIdx,
-                              project: proj,
-                            })
-                          }
-                          title="Improve project description with AI"
-                          className="absolute bottom-2.5 right-2.5 bg-purple-600 hover:bg-purple-700 text-white px-2.5 py-1 rounded-full shadow-xs transition-all active:scale-95 flex items-center gap-1 text-[11px] font-bold cursor-pointer"
-                        >
-                          <span className="material-symbols-outlined text-[14px]">
-                            auto_awesome
-                          </span>
-                          AI Polish
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                ))}
               </div>
             )}
 
-            {/* STEP 3: Skills & Education */}
-            {currentStep === 3 && (
-              <div className="flex flex-col gap-5">
-                <div>
-                  <h2 className="text-[18px] font-bold text-slate-900">
-                    Skills & Competencies
-                  </h2>
-                  <p className="text-[13px] text-slate-600">
-                    High-relevance keywords indexed by modern ATS search filters.
+            {/* 4. KEY PROJECTS SECTION */}
+            {activeSection === "projects" && (
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between px-1">
+                  <div>
+                    <h3 className="text-[17px] font-bold text-slate-900 tracking-tight">
+                      Key Projects
+                    </h3>
+                    <p className="text-[12.5px] text-slate-500 mt-0.5">
+                      Showcase high-impact projects, open-source work, or software products.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAddProject}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-[12.5px] font-bold px-3.5 py-1.5 rounded-full flex items-center gap-1 shadow-xs cursor-pointer active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">add</span>
+                    Add Project
+                  </button>
+                </div>
+
+                {(resume.projects || []).length === 0 ? (
+                  <div className="bg-white rounded-3xl p-6 border border-slate-200/80 text-center flex flex-col items-center gap-2">
+                    <span className="material-symbols-outlined text-[32px] text-slate-400">code</span>
+                    <p className="text-[13.5px] text-slate-600">No projects added yet.</p>
+                    <button
+                      type="button"
+                      onClick={handleAddProject}
+                      className="text-[13px] font-bold text-indigo-600 hover:underline cursor-pointer"
+                    >
+                      + Add your first project
+                    </button>
+                  </div>
+                ) : (
+                  (resume.projects || []).map((proj, pIdx) => (
+                    <div
+                      key={proj.id}
+                      className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-xs flex flex-col gap-4"
+                    >
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <span className="text-[13px] font-mono font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full">
+                          Project #{pIdx + 1}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setProjectModalData({
+                                isOpen: true,
+                                projectIndex: pIdx,
+                                project: proj,
+                              })
+                            }
+                            className="flex items-center gap-1 px-3 py-1 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 text-[11.5px] font-bold border border-purple-200 transition-colors cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
+                            Improve Project
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveProject(proj.id)}
+                            className="text-slate-400 hover:text-rose-600 p-1"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[12px] font-bold text-slate-700 mb-1">
+                            Project Title:
+                          </label>
+                          <input
+                            type="text"
+                            value={proj.title}
+                            onChange={(e) => {
+                              const updated = [...(resume.projects || [])];
+                              updated[pIdx] = { ...proj, title: e.target.value };
+                              onChange({ ...resume, projects: updated });
+                            }}
+                            placeholder="e.g. AI Content Studio"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[12px] font-bold text-slate-700 mb-1">
+                            Live URL / Repo Link:
+                          </label>
+                          <input
+                            type="text"
+                            value={proj.link || ""}
+                            onChange={(e) => {
+                              const updated = [...(resume.projects || [])];
+                              updated[pIdx] = { ...proj, link: e.target.value };
+                              onChange({ ...resume, projects: updated });
+                            }}
+                            placeholder="e.g. github.com/user/project"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[12px] font-bold text-slate-700 mb-1">
+                          Project Summary / Tech Stack:
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={proj.description}
+                          onChange={(e) => {
+                            const updated = [...(resume.projects || [])];
+                            updated[pIdx] = { ...proj, description: e.target.value };
+                            onChange({ ...resume, projects: updated });
+                          }}
+                          placeholder="Describe the architectural design, technologies used, and business outcome..."
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-[13px] text-slate-900 focus:outline-hidden focus:border-indigo-600 leading-relaxed font-sans"
+                        />
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* 5. EDUCATION SECTION */}
+            {activeSection === "education" && (
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between px-1">
+                  <div>
+                    <h3 className="text-[17px] font-bold text-slate-900 tracking-tight">
+                      Education
+                    </h3>
+                    <p className="text-[12.5px] text-slate-500 mt-0.5">
+                      Degrees, academic honors, universities, and graduation dates.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAddEducation}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-[12.5px] font-bold px-3.5 py-1.5 rounded-full flex items-center gap-1 shadow-xs cursor-pointer active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">add</span>
+                    Add Education
+                  </button>
+                </div>
+
+                {resume.education.map((edu, eduIdx) => (
+                  <div
+                    key={edu.id}
+                    className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-xs flex flex-col gap-4"
+                  >
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      <span className="text-[13px] font-mono font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full">
+                        Degree #{eduIdx + 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveEducation(edu.id)}
+                        className="text-slate-400 hover:text-rose-600 p-1"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[12px] font-bold text-slate-700 mb-1">
+                          Degree / Major:
+                        </label>
+                        <input
+                          type="text"
+                          value={edu.degree}
+                          onChange={(e) => {
+                            const updated = [...resume.education];
+                            updated[eduIdx] = { ...edu, degree: e.target.value };
+                            onChange({ ...resume, education: updated });
+                          }}
+                          placeholder="e.g. B.S. in Computer Science"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[12px] font-bold text-slate-700 mb-1">
+                          University / Institution:
+                        </label>
+                        <input
+                          type="text"
+                          value={edu.school}
+                          onChange={(e) => {
+                            const updated = [...resume.education];
+                            updated[eduIdx] = { ...edu, school: e.target.value };
+                            onChange({ ...resume, education: updated });
+                          }}
+                          placeholder="e.g. UC Berkeley"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[12px] font-bold text-slate-700 mb-1">
+                          Location:
+                        </label>
+                        <input
+                          type="text"
+                          value={edu.location || ""}
+                          onChange={(e) => {
+                            const updated = [...resume.education];
+                            updated[eduIdx] = { ...edu, location: e.target.value };
+                            onChange({ ...resume, education: updated });
+                          }}
+                          placeholder="e.g. Berkeley, CA"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[12px] font-bold text-slate-700 mb-1">
+                          Graduation Year:
+                        </label>
+                        <input
+                          type="text"
+                          value={edu.year}
+                          onChange={(e) => {
+                            const updated = [...resume.education];
+                            updated[eduIdx] = { ...edu, year: e.target.value };
+                            onChange({ ...resume, education: updated });
+                          }}
+                          placeholder="e.g. 2022"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 6. SKILLS SECTION */}
+            {activeSection === "skills" && (
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col gap-4">
+                <div className="border-b border-slate-100 pb-3">
+                  <h3 className="text-[17px] font-bold text-slate-900 tracking-tight">
+                    Technical &amp; Professional Skills
+                  </h3>
+                  <p className="text-[12.5px] text-slate-500 mt-0.5">
+                    ATS parsing engines scan skills for direct keyword alignment with job postings.
                   </p>
                 </div>
 
-                {/* Skill input */}
-                <div className="flex gap-2">
-                  <div className="flex-1 m3-input-field">
-                    <input
-                      type="text"
-                      placeholder="e.g. Kotlin Coroutines, Jetpack Compose, Hilt"
-                      value={newSkillInput}
-                      onChange={(e) => setNewSkillInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleAddSkill(newSkillInput);
-                        }
-                      }}
-                    />
-                    <label>Add Skill or Tech Keyword</label>
-                  </div>
+                {/* Add Skill Input */}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={newSkillInput}
+                    onChange={(e) => setNewSkillInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddSkill(newSkillInput);
+                      }
+                    }}
+                    placeholder="Type a skill (e.g. React, TypeScript, Docker) and press Enter..."
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[13.5px] text-slate-900 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
+                  />
                   <button
                     type="button"
                     onClick={() => handleAddSkill(newSkillInput)}
-                    className="bg-indigo-600 text-white px-5 rounded-xl font-bold text-[13px] hover:bg-indigo-700 transition-colors shadow-xs"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold px-5 py-2.5 rounded-xl shadow-xs cursor-pointer active:scale-95"
                   >
                     Add
                   </button>
                 </div>
 
-                {/* Skill Chips */}
-                <div className="flex flex-wrap gap-2">
+                {/* Skills Pills */}
+                <div className="flex flex-wrap gap-2 pt-2">
                   {resume.skills.map((skill) => (
                     <span
                       key={skill}
-                      className="bg-indigo-50 text-indigo-900 border border-indigo-200 font-mono text-[12px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-2xs group"
+                      className="bg-indigo-50/80 text-indigo-900 border border-indigo-200/80 text-[12.5px] font-mono font-medium px-3 py-1.5 rounded-xl flex items-center gap-1.5 group"
                     >
-                      {skill}
+                      <span>{skill}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveSkill(skill)}
-                        className="text-slate-400 hover:text-rose-600 flex items-center justify-center ml-0.5 transition-colors"
+                        className="text-indigo-400 hover:text-rose-600 p-0.5 rounded-full"
                       >
-                        <span className="material-symbols-outlined text-[14px]">close</span>
+                        <span className="material-symbols-outlined text-[15px]">close</span>
                       </button>
                     </span>
                   ))}
                 </div>
 
-                {/* Recommended Quick Chips */}
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
-                  <span className="text-[11px] uppercase tracking-wider font-mono font-bold text-slate-500 block mb-2">
-                    Popular keywords to add:
+                {/* Recommended Quick-Add Skills */}
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  <span className="text-[12px] font-bold text-slate-600 block mb-2 font-mono">
+                    Popular In-Demand Skills:
                   </span>
                   <div className="flex flex-wrap gap-1.5">
-                    {["Kotlin Coroutines", "Jetpack Compose", "Hilt", "CI/CD", "Room DB", "MVVM", "Clean Architecture", "Unit Testing"].map(
-                      (kw) => {
-                        const hasSkill = resume.skills.includes(kw);
-                        if (hasSkill) return null;
-                        return (
-                          <button
-                            key={kw}
-                            type="button"
-                            onClick={() => handleAddSkill(kw)}
-                            className="bg-white border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 text-indigo-700 text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 transition-all"
-                          >
-                            <span className="material-symbols-outlined text-[12px]">add</span>
-                            {kw}
-                          </button>
-                        );
-                      }
-                    )}
+                    {["TypeScript", "React", "Node.js", "Python", "GraphQL", "Docker", "AWS", "Tailwind CSS", "CI/CD", "Jest"].map((quickSkill) => {
+                      const alreadyHas = resume.skills.includes(quickSkill);
+                      return (
+                        <button
+                          key={quickSkill}
+                          type="button"
+                          onClick={() => !alreadyHas && handleAddSkill(quickSkill)}
+                          disabled={alreadyHas}
+                          className={`text-[11.5px] font-mono px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                            alreadyHas
+                              ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
+                              : "bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border-slate-200 hover:border-indigo-300"
+                          }`}
+                        >
+                          + {quickSkill}
+                        </button>
+                      );
+                    })}
                   </div>
-                </div>
-
-                {/* Education section */}
-                <div className="border-t border-slate-200 pt-4 mt-2">
-                  <h3 className="text-[16px] font-bold text-slate-900 mb-3">
-                    Education
-                  </h3>
-                  {resume.education.map((edu, idx) => (
-                    <div key={edu.id || idx} className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                      <div className="m3-input-field">
-                        <input
-                          type="text"
-                          placeholder=" "
-                          value={edu.degree}
-                          onChange={(e) => {
-                            const updated = [...resume.education];
-                            updated[idx].degree = e.target.value;
-                            onChange({ ...resume, education: updated });
-                          }}
-                        />
-                        <label>Degree / Major</label>
-                      </div>
-                      <div className="m3-input-field">
-                        <input
-                          type="text"
-                          placeholder=" "
-                          value={edu.school}
-                          onChange={(e) => {
-                            const updated = [...resume.education];
-                            updated[idx].school = e.target.value;
-                            onChange({ ...resume, education: updated });
-                          }}
-                        />
-                        <label>Institution / University</label>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </div>
             )}
 
-            {/* Bottom Actions & Demo Toggle */}
-            <div className="flex items-center justify-between pt-5 mt-3 border-t border-slate-200">
-              {/* Demo Mode Toggle */}
-              <div className="flex items-center gap-2.5">
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    id="demoToggle"
-                    type="checkbox"
-                    checked={isDemoMode}
-                    onChange={handleDemoToggle}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600" />
-                </label>
-                <label
-                  htmlFor="demoToggle"
-                  className="text-[13px] font-semibold text-slate-600 cursor-pointer select-none font-mono"
-                >
-                  Demo Mode
-                </label>
-              </div>
+            {/* 7. TEMPLATES SELECTOR SECTION */}
+            {activeSection === "templates" && (
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col gap-4">
+                <div className="border-b border-slate-100 pb-3">
+                  <h3 className="text-[17px] font-bold text-slate-900 tracking-tight">
+                    Select Resume Template
+                  </h3>
+                  <p className="text-[12.5px] text-slate-500 mt-0.5">
+                    Choose an ATS-compliant layout crafted for maximum recruiter readability.
+                  </p>
+                </div>
 
-              <div className="flex items-center gap-2">
-                {currentStep > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep((s) => (s - 1) as 1 | 2 | 3)}
-                    className="border border-slate-300 text-slate-700 hover:bg-slate-50 text-[13px] font-bold px-4 py-2.5 rounded-full transition-colors active:scale-95"
-                  >
-                    Back
-                  </button>
-                )}
+                {/* Visual Template Cards Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {templates.map((tpl) => {
+                    const isSelected = (resume.selectedTemplate || "modern") === tpl.id;
+                    return (
+                      <div
+                        key={tpl.id}
+                        onClick={() => onChange({ ...resume, selectedTemplate: tpl.id })}
+                        className={`rounded-2xl p-4 border-2 transition-all cursor-pointer flex flex-col justify-between gap-3 relative ${
+                          isSelected
+                            ? "border-indigo-600 bg-indigo-50/20 shadow-sm ring-2 ring-indigo-100"
+                            : "border-slate-200 hover:border-indigo-300 bg-white hover:bg-slate-50/50"
+                        }`}
+                      >
+                        {/* Selected Checkmark Badge */}
+                        {isSelected && (
+                          <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+                            <span className="material-symbols-outlined text-[16px] font-bold">check</span>
+                          </div>
+                        )}
 
-                {currentStep < 3 ? (
-                  <button
-                    type="button"
-                    id="next-step-btn"
-                    onClick={() => setCurrentStep((s) => (s + 1) as 1 | 2 | 3)}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-[14px] font-bold px-6 py-2.5 rounded-full shadow-md shadow-indigo-500/20 flex items-center gap-1.5 transition-all active:scale-95"
-                  >
-                    Next: {currentStep === 1 ? "Experience" : "Skills"}
-                    <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    id="run-analysis-btn"
-                    onClick={() => {
-                      if (onNavigateToAtsScanner) {
-                        onNavigateToAtsScanner(resume);
-                      } else {
-                        onRunAnalysis(resume);
-                      }
-                    }}
-                    className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 hover:from-indigo-500 hover:to-indigo-600 text-white text-[14px] font-bold px-6 py-2.5 rounded-full shadow-lg shadow-indigo-500/25 flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">document_scanner</span>
-                    Check ATS Score
-                  </button>
-                )}
+                        <div>
+                          {/* Miniature Template Wireframe Preview */}
+                          <div className="w-full h-24 bg-slate-100 rounded-xl mb-3 border border-slate-200/80 p-2 flex flex-col justify-between overflow-hidden">
+                            {tpl.id === "modern" && (
+                              <div className="flex flex-col gap-1 w-full">
+                                <div className="h-2.5 w-1/3 bg-indigo-600 rounded-sm" />
+                                <div className="h-1.5 w-2/3 bg-slate-300 rounded-sm" />
+                                <div className="h-px w-full bg-indigo-200 my-0.5" />
+                                <div className="h-2 w-full bg-slate-200 rounded-sm" />
+                                <div className="h-2 w-4/5 bg-slate-200 rounded-sm" />
+                              </div>
+                            )}
+                            {tpl.id === "classic" && (
+                              <div className="flex flex-col items-center gap-1 w-full text-center">
+                                <div className="h-2.5 w-1/2 bg-slate-800 rounded-sm" />
+                                <div className="h-1.5 w-3/4 bg-slate-400 rounded-sm" />
+                                <div className="h-0.5 w-full bg-slate-800 my-0.5" />
+                                <div className="h-2 w-full bg-slate-200 rounded-sm" />
+                              </div>
+                            )}
+                            {tpl.id === "minimal" && (
+                              <div className="flex flex-col gap-1 w-full">
+                                <div className="h-2.5 w-1/4 bg-slate-900 rounded-sm" />
+                                <div className="h-1.5 w-1/2 bg-slate-400 rounded-sm" />
+                                <div className="h-2 w-full bg-slate-200 rounded-sm mt-1" />
+                                <div className="h-2 w-3/4 bg-slate-200 rounded-sm" />
+                              </div>
+                            )}
+                            {tpl.id === "executive" && (
+                              <div className="grid grid-cols-3 gap-1.5 w-full h-full">
+                                <div className="col-span-1 bg-slate-200/80 rounded-sm p-1 flex flex-col gap-1">
+                                  <div className="h-2 w-full bg-slate-400 rounded-sm" />
+                                  <div className="h-1.5 w-3/4 bg-slate-300 rounded-sm" />
+                                </div>
+                                <div className="col-span-2 flex flex-col gap-1">
+                                  <div className="h-2.5 w-1/2 bg-indigo-700 rounded-sm" />
+                                  <div className="h-2 w-full bg-slate-200 rounded-sm" />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-[15px] font-bold text-slate-900">{tpl.name}</h4>
+                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                              {tpl.badge}
+                            </span>
+                          </div>
+
+                          <p className="text-[12px] text-slate-600 mt-1 leading-relaxed">
+                            {tpl.desc}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* Right Column: Live A4 Document Preview */}
+        {/* Right Column: Sticky Live A4 Document Preview (Desktop) */}
         <div className="hidden lg:flex lg:w-5/12 flex-col">
-          <div className="sticky top-20 bg-white rounded-2xl shadow-md border border-slate-200/80 overflow-hidden flex flex-col h-[calc(100vh-6rem)]">
-            <div className="bg-slate-50 px-4 py-2.5 border-b border-slate-200 flex flex-wrap justify-between items-center gap-2">
+          <div className="sticky top-20 bg-white rounded-3xl shadow-md border border-slate-200/80 overflow-hidden flex flex-col h-[calc(100vh-6.5rem)]">
+            {/* Live Preview Header Toolbar */}
+            <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex flex-wrap justify-between items-center gap-2">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-indigo-600 text-[18px]">
                   visibility
                 </span>
-                <span className="text-[12px] font-bold text-slate-700 uppercase tracking-wider font-mono">
-                  Live Preview
+                <span className="text-[12px] font-bold text-slate-800 uppercase tracking-wider font-mono">
+                  Live A4 Preview
                 </span>
               </div>
 
@@ -987,12 +1212,12 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
                   id="template-select-dropdown"
                   value={resume.selectedTemplate || "modern"}
                   onChange={(e) => onChange({ ...resume, selectedTemplate: e.target.value })}
-                  className="text-[11.5px] font-mono font-semibold bg-white border border-slate-200 rounded-lg px-2 py-1 text-slate-700 outline-hidden hover:border-indigo-400 cursor-pointer"
+                  className="text-[11.5px] font-mono font-semibold bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 outline-hidden hover:border-indigo-400 cursor-pointer"
                 >
-                  <option value="modern">Modern (Default)</option>
-                  <option value="classic">Classic / Serif</option>
-                  <option value="minimal">Minimalist</option>
-                  <option value="executive">Executive / Two-Col</option>
+                  <option value="modern">Modern</option>
+                  <option value="classic">Classic</option>
+                  <option value="minimal">Minimal</option>
+                  <option value="executive">Executive</option>
                 </select>
 
                 {onExportPdf && (
@@ -1001,22 +1226,22 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
                     id="builder-export-pdf-btn"
                     disabled={isExportingPdf}
                     onClick={() => onExportPdf(resume)}
-                    className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white px-3 py-1 rounded-lg text-[11.5px] font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
+                    className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white px-3.5 py-1 rounded-lg text-[12px] font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
                   >
                     {isExportingPdf ? (
                       <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <span className="material-symbols-outlined text-[14px]">picture_as_pdf</span>
+                      <span className="material-symbols-outlined text-[15px]">picture_as_pdf</span>
                     )}
-                    <span>{isExportingPdf ? "Exporting..." : "Export PDF"}</span>
+                    <span>PDF</span>
                   </button>
                 )}
               </div>
             </div>
 
-            {/* Simulated A4 Document Content */}
+            {/* Simulated A4 Document Scroll Area */}
             <div className="flex-grow overflow-y-auto bg-slate-100 p-4 flex justify-center">
-              <div className="w-full max-w-[700px] shadow-sm rounded-lg overflow-hidden bg-white">
+              <div className="w-full max-w-[650px] shadow-sm rounded-xl overflow-hidden bg-white">
                 <ResumeDocument
                   resume={resume}
                   template={resume.selectedTemplate || "modern"}
@@ -1031,7 +1256,7 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
           <button
             type="button"
             onClick={() => setShowMobilePreview(!showMobilePreview)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-full shadow-lg shadow-indigo-500/25 flex items-center gap-2 text-[13px] font-bold active:scale-95"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-full shadow-lg shadow-indigo-500/25 flex items-center gap-2 text-[13px] font-bold active:scale-95 cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">visibility</span>
             {showMobilePreview ? "Hide Preview" : "Live A4 Preview"}
@@ -1054,7 +1279,7 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
                       type="button"
                       disabled={isExportingPdf}
                       onClick={() => onExportPdf(resume)}
-                      className="bg-indigo-600 text-white px-3 py-1 rounded-full text-[12px] font-bold flex items-center gap-1 shadow-xs"
+                      className="bg-indigo-600 text-white px-3 py-1 rounded-full text-[12px] font-bold flex items-center gap-1 shadow-xs cursor-pointer"
                     >
                       {isExportingPdf ? (
                         <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -1067,7 +1292,7 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowMobilePreview(false)}
-                    className="p-1 rounded-full hover:bg-slate-200"
+                    className="p-1 rounded-full hover:bg-slate-200 cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-[20px]">close</span>
                   </button>
@@ -1119,7 +1344,7 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
         isOpen={projectModalData.isOpen}
         onClose={() => setProjectModalData((prev) => ({ ...prev, isOpen: false }))}
         project={projectModalData.project}
-        onApply={(improvedDescription, bullets) => {
+        onApply={(improvedDescription) => {
           const updatedProjects = [...(resume.projects || [])];
           if (updatedProjects[projectModalData.projectIndex]) {
             updatedProjects[projectModalData.projectIndex] = {
