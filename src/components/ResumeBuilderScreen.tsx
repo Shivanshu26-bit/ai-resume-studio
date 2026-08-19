@@ -14,6 +14,7 @@ interface ResumeBuilderScreenProps {
   onSave?: (resume: Resume) => void;
   isSaving?: boolean;
   onRunAnalysis: (resume: Resume) => void;
+  onNavigateToAtsScanner?: (resume: Resume) => void;
   onExportPdf?: (resume: Resume) => void;
   isExportingPdf?: boolean;
   onBack: () => void;
@@ -26,6 +27,7 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
   onSave,
   isSaving = false,
   onRunAnalysis,
+  onNavigateToAtsScanner,
   onExportPdf,
   isExportingPdf = false,
   onBack,
@@ -233,15 +235,21 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Job Matcher Trigger */}
+              {/* Dedicated ATS Scanner / Check ATS Score Trigger */}
               <button
                 type="button"
-                id="open-job-matcher-btn"
-                onClick={() => setIsJobMatcherOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-[12px] border border-purple-200 transition-all cursor-pointer shadow-2xs active:scale-95"
+                id="check-ats-score-btn"
+                onClick={() => {
+                  if (onNavigateToAtsScanner) {
+                    onNavigateToAtsScanner(resume);
+                  } else {
+                    onRunAnalysis(resume);
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-[12px] border border-purple-200 transition-all cursor-pointer shadow-2xs active:scale-95"
               >
-                <span className="material-symbols-outlined text-[16px]">target</span>
-                Match Job Description
+                <span className="material-symbols-outlined text-[16px]">document_scanner</span>
+                Check ATS Score
               </button>
 
               <button
@@ -942,11 +950,17 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
                   <button
                     type="button"
                     id="run-analysis-btn"
-                    onClick={() => onRunAnalysis(resume)}
-                    className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 hover:from-indigo-500 hover:to-indigo-600 text-white text-[14px] font-bold px-6 py-2.5 rounded-full shadow-lg shadow-indigo-500/25 flex items-center gap-1.5 transition-all active:scale-95 animate-pulse"
+                    onClick={() => {
+                      if (onNavigateToAtsScanner) {
+                        onNavigateToAtsScanner(resume);
+                      } else {
+                        onRunAnalysis(resume);
+                      }
+                    }}
+                    className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 hover:from-indigo-500 hover:to-indigo-600 text-white text-[14px] font-bold px-6 py-2.5 rounded-full shadow-lg shadow-indigo-500/25 flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
-                    Run ATS Analysis
+                    <span className="material-symbols-outlined text-[18px]">document_scanner</span>
+                    Check ATS Score
                   </button>
                 )}
               </div>

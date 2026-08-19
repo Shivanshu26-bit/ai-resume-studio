@@ -11,9 +11,10 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
   onTabChange,
 }) => {
   const tabs: Array<{ id: BottomNavTab; label: string; icon: string }> = [
-    { id: "home", label: "Home", icon: "home" },
-    { id: "builder", label: "Build", icon: "add_circle" },
-    { id: "history", label: "History", icon: "history" },
+    { id: "home", label: "Dashboard", icon: "space_dashboard" },
+    { id: "builder", label: "Builder", icon: "edit_document" },
+    { id: "scanner", label: "ATS Scanner", icon: "document_scanner" },
+    { id: "history", label: "My Resumes", icon: "folder_open" },
     { id: "settings", label: "Settings", icon: "person" },
   ];
 

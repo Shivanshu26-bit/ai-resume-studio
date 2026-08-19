@@ -133,7 +133,7 @@ export type ActiveScreen =
   | "settings"
   | "scanner";
 
-export type BottomNavTab = "home" | "builder" | "history" | "settings";
+export type BottomNavTab = "home" | "builder" | "scanner" | "history" | "settings";
 
 export interface UserProfile {
   uid?: string;

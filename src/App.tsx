@@ -6,6 +6,7 @@ import { SplashScreen } from "./components/SplashScreen";
 import { LoginScreen } from "./components/LoginScreen";
 import { HomeScreen } from "./components/HomeScreen";
 import { ResumeBuilderScreen } from "./components/ResumeBuilderScreen";
+import { AtsScannerScreen } from "./components/AtsScannerScreen";
 import { AnalysisResultsScreen } from "./components/AnalysisResultsScreen";
 import { ResumeHistoryScreen } from "./components/ResumeHistoryScreen";
 import { SettingsScreen } from "./components/SettingsScreen";
@@ -80,29 +81,32 @@ function MainAppContent() {
   // Handlers
   const handleSelectResume = (resume: Resume) => {
     setActiveResume(resume);
-    if (resume.analysis) {
-      setCurrentTab("analysis");
-    } else {
-      setCurrentTab("builder");
-    }
+    setCurrentTab("builder");
   };
 
-  const handleNewAnalysis = async () => {
+  const handleOpenScannerForResume = (resume?: Resume) => {
+    if (resume) {
+      setActiveResume(resume);
+    }
+    setCurrentTab("scanner");
+  };
+
+  const handleNewResume = async () => {
     if (!user) return;
     const now = Date.now();
     const newResumeId = `res-${now}-${Math.random().toString(36).substring(2, 6)}`;
     const newResume: Resume = {
       id: newResumeId,
       title: "New AI Resume",
-      targetRole: user.targetRole || "Senior Android Engineer",
+      targetRole: user.targetRole || "Software Engineer",
       lastEdited: "Just now",
       updatedAt: now,
       createdAt: now,
       atsScore: 75,
       selectedTemplate: "modern",
       personal: {
-        firstName: user.name?.split(" ")[0] || "Alex",
-        lastName: user.name?.split(" ")[1] || "Chen",
+        firstName: user.name?.split(" ")[0] || user.displayName?.split(" ")[0] || "Alex",
+        lastName: user.name?.split(" ")[1] || user.displayName?.split(" ")[1] || "Chen",
         email: user.email,
         phone: "(555) 987-6543",
         location: "San Francisco, CA",
@@ -112,15 +116,15 @@ function MainAppContent() {
       experiences: [
         {
           id: "exp-" + now,
-          title: "Senior Mobile Engineer",
-          company: "Apex Tech Labs",
+          title: "Software Engineer",
+          company: "Tech Solutions Inc.",
           location: "San Francisco, CA",
-          startDate: "2021",
+          startDate: "2022",
           endDate: "Present",
           current: true,
           bullets: [
-            "Architected modern Android client using Kotlin, Jetpack Compose, and MVI architecture for 500k+ active users.",
-            "Spearheaded multi-module migration reducing clean build time by 45% across 14 mobile developers.",
+            "Engineered scalable web applications and REST APIs using modern TypeScript frameworks.",
+            "Optimized continuous integration pipelines, cutting test and deployment cycle times by 35%.",
           ],
         },
       ],
@@ -128,12 +132,12 @@ function MainAppContent() {
         {
           id: "edu-" + now,
           degree: "B.S. in Computer Science",
-          school: "University of California, Berkeley",
-          location: "Berkeley, CA",
-          year: "2019",
+          school: "State University",
+          location: "San Francisco, CA",
+          year: "2022",
         },
       ],
-      skills: ["Kotlin", "Jetpack Compose", "Coroutines", "Hilt", "Room DB", "CI/CD"],
+      skills: ["TypeScript", "React", "Node.js", "REST APIs", "Git", "CI/CD"],
     };
 
     setActiveResume(newResume);
@@ -181,7 +185,7 @@ function MainAppContent() {
   const handleRunAtsAnalysis = async (resumeToAnalyze: Resume) => {
     try {
       setIsSavingResume(true);
-      const res = await fetch("/api/gemini/analyze-resume", {
+      const res = await fetch("/api/ai/ats-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -199,11 +203,11 @@ function MainAppContent() {
       };
       await handleUpdateResume(updated);
       showToast("ATS Analysis complete & saved to Firestore!");
-      setCurrentTab("analysis");
+      setCurrentTab("scanner");
     } catch (err: any) {
       console.error("Error analyzing resume:", err);
       showToast("Analysis complete. Saved draft.", "info");
-      setCurrentTab("analysis");
+      setCurrentTab("scanner");
     } finally {
       setIsSavingResume(false);
     }
@@ -388,10 +392,11 @@ function MainAppContent() {
             user={user}
             resumes={resumes}
             onSelectResume={handleSelectResume}
-            onNewAnalysis={handleNewAnalysis}
+            onNewResume={handleNewResume}
+            onOpenScanner={handleOpenScannerForResume}
             onViewAllHistory={() => setCurrentTab("history")}
             onOpenSettings={() => setCurrentTab("settings")}
-            onOpenScanner={() => setIsScannerOpen(true)}
+            onExportPdf={handleExportPdf}
           />
         )}
 
@@ -402,6 +407,10 @@ function MainAppContent() {
             onSave={handleUpdateResume}
             isSaving={isSavingResume}
             onRunAnalysis={handleRunAtsAnalysis}
+            onNavigateToAtsScanner={(res) => {
+              setActiveResume(res);
+              setCurrentTab("scanner");
+            }}
             onExportPdf={handleExportPdf}
             isExportingPdf={isExportingPdf}
             onBack={() => setCurrentTab("home")}
@@ -409,17 +418,20 @@ function MainAppContent() {
           />
         )}
 
-        {currentTab === "analysis" && (
-          <AnalysisResultsScreen
-            resume={activeResume}
-            analysis={activeResume.analysis || sampleResumes[0].analysis!}
-            onApplyOptimizedSummary={handleApplyOptimizedSummary}
-            onAddKeyword={handleAddKeyword}
-            onSaveToProfile={() => setCurrentTab("home")}
-            onExportPdf={() => handleExportPdf(activeResume)}
+        {currentTab === "scanner" && (
+          <AtsScannerScreen
+            resumes={resumes}
+            activeResume={activeResume}
+            onSelectResume={(res) => setActiveResume(res)}
+            onUpdateResume={handleUpdateResume}
+            onNavigateToBuilder={(res) => {
+              setActiveResume(res);
+              setCurrentTab("builder");
+            }}
+            onExportPdf={handleExportPdf}
             isExportingPdf={isExportingPdf}
-            onBack={() => setCurrentTab("builder")}
             onOpenSettings={() => setCurrentTab("settings")}
+            onBackToDashboard={() => setCurrentTab("home")}
           />
         )}
 
@@ -427,7 +439,8 @@ function MainAppContent() {
           <ResumeHistoryScreen
             resumes={resumes}
             onSelectResume={handleSelectResume}
-            onNewResume={handleNewAnalysis}
+            onScanResume={handleOpenScannerForResume}
+            onNewResume={handleNewResume}
             onDeleteResume={handleDeleteResume}
             onDuplicateResume={handleDuplicateResume}
             onExportPdf={handleExportPdf}
@@ -452,7 +465,7 @@ function MainAppContent() {
           activeTab={currentTab}
           onTabChange={(tab) => {
             if (tab === "builder" && !activeResume) {
-              handleNewAnalysis();
+              handleNewResume();
             } else {
               setCurrentTab(tab);
             }
@@ -470,7 +483,7 @@ function MainAppContent() {
               await saveUserResume(user.uid, scannedResume);
               showToast("Scanned resume saved to Cloud Firestore");
             }
-            setCurrentTab("analysis");
+            setCurrentTab("scanner");
           }}
         />
 
