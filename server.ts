@@ -446,8 +446,8 @@ function generateFactualFallbackAnalysis(
       type: "trending_up",
     },
     {
-      title: "Align Relevant Certifications",
-      description: "Ensure relevant licenses or certifications (e.g. CTET, B.Ed, KNC, Tally, BLS, AWS) are clearly listed with issuing authority.",
+      title: "Align Relevant Certifications (If Applicable)",
+      description: "Consider adding relevant licenses or certifications if applicable (e.g. CTET, B.Ed, KNC, Tally, BLS, AWS) only if you legitimately possess them.",
       type: "lightbulb",
     },
   ];
@@ -791,19 +791,23 @@ app.post(["/api/ai/generate-summary", "/api/gemini/optimize-summary"], async (re
 
     const systemPrompt = `You are a professional, factual, industry-specific ATS resume summary generator supporting global and Indian job seekers in diverse industries (${effectiveIndustry}) and languages (${effectiveLanguage}).
 
-CRITICAL ANTI-HALLUCINATION MANDATES:
-1. You MUST NOT fabricate, invent, or assume ANY of the following:
+CRITICAL ANTI-HALLUCINATION & FACTUALITY MANDATES:
+1. Industry-specific terminology (e.g., CTET, CBSE, Tally Prime, GSTR-3B, ACLS, ICU ventilator protocols, AWS, etc.) must NEVER become invented candidate facts.
+2. Do NOT add CTET unless the resume/job context explicitly supports it.
+3. Do NOT claim Tally Prime experience unless the candidate's resume supports it.
+4. Do NOT claim ACLS, ventilator, GSTR-3B, CBSE experience, certifications, tools, metrics, or responsibilities unless supported by the source resume or explicitly provided by the user.
+5. You MUST NOT fabricate, invent, or assume ANY of the following:
    - Years of experience (e.g. do NOT say "5+ years" unless explicitly stated in candidate data)
    - Job titles or seniorities not present
    - Companies, schools, or clients
    - Numerical metrics, exam pass rates, user counts, or revenue (NEVER invent figures)
    - Certifications, tools, or skills not present in the candidate's actual data.
-2. Candidate's actual level: "${candidateLevel}".
-3. Candidate's target industry: "${effectiveIndustry}".
-4. Candidate's target profession/role: "${effectiveRole}".
-5. Preferred Language: "${effectiveLanguage}". Write the summary in ${effectiveLanguage} (or professional English if preferredLanguage is English).
-6. Adapt the vocabulary and pedagogical/clinical/financial/technical tone to ${effectiveIndustry} (e.g. lesson planning for teachers, patient care for nurses, ledger/tax for accountants, sales outreach for sales executives, clean code for developers).
-7. Return a concise, high-impact 2-3 sentence summary that is 100% truthful.`;
+6. Candidate's actual level: "${candidateLevel}".
+7. Candidate's target industry: "${effectiveIndustry}".
+8. Candidate's target profession/role: "${effectiveRole}".
+9. Preferred Language: "${effectiveLanguage}". Write the summary in ${effectiveLanguage} (or professional English if preferredLanguage is English).
+10. Adapt the vocabulary and pedagogical/clinical/financial/technical tone to ${effectiveIndustry} (e.g. lesson planning for teachers, patient care for nurses, ledger/tax for accountants, sales outreach for sales executives, clean code for developers) strictly grounded in verified facts.
+11. Return a concise, high-impact 2-3 sentence summary that is 100% truthful.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3.7-flash",
@@ -893,11 +897,13 @@ app.post(["/api/ai/improve-content", "/api/gemini/enhance-bullet"], async (req, 
 
     const systemPrompt = `You are a specialized resume editor with domain expertise across diverse industries (Education, Healthcare, Finance, IT, Sales, Manufacturing, Hospitality, etc.).
 
-CRITICAL ANTI-HALLUCINATION RULES:
-1. Strengthen active verbs, clarity, grammar, and industry-specific professionalism.
-2. DO NOT invent fake metrics, percentages, revenue amounts, student counts, or patient numbers unless explicitly in the user's text.
-3. If suggesting a place where a quantifiable metric would strengthen the bullet, use explicit bracketed placeholders like "[add specific metric if verifiable, e.g. student count or batch size]".
-4. Return 3 refined variations aligned with ${industry} terminology in ${preferredLanguage}.`;
+CRITICAL ANTI-HALLUCINATION & FACTUALITY RULES:
+1. Industry-specific terminology (e.g. CTET, CBSE, Tally Prime, GSTR-3B, ACLS, ICU ventilator protocols, AWS, etc.) must NEVER become invented candidate facts.
+2. Do NOT claim the candidate has certifications, tools, metrics, or responsibilities unless supported by the source resume or explicitly provided by the user.
+3. Strengthen active verbs, clarity, grammar, and industry-specific professionalism strictly within the candidate's actual responsibilities.
+4. DO NOT invent fake metrics, percentages, revenue amounts, student counts, or patient numbers.
+5. When useful but unsupported, phrase it as a suggestion or use bracketed placeholder (e.g. "[Consider adding this if applicable, e.g. student count or batch size]") — NOT as a factual resume statement.
+6. Return 3 refined variations aligned with ${industry} terminology in ${preferredLanguage}.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3.7-flash",
@@ -1197,31 +1203,34 @@ app.post(["/api/ai/ats-analysis", "/api/gemini/analyze-resume"], async (req, res
 
     const systemPrompt = `You are a strict, factual, and objective Applicant Tracking System (ATS) Resume Auditor evaluating candidates across all Indian and global industries (${effectiveIndustry}).
 
-CORE ANTI-HALLUCINATION RULE:
-NEVER invent, assume, or hallucinate:
-- Years of experience (e.g. do NOT say "5+ years of experience" unless explicitly stated)
-- Seniorities or job titles
-- Companies or employers
-- Production metrics, customer figures, pass rates, or revenue numbers
-- Certifications, tools, or skills not in the resume.
-
-Every factual claim in the analysis and summary MUST be 100% supported by the candidate's actual resume data.
+CORE ANTI-HALLUCINATION & FACTUALITY AUDIT MANDATES:
+1. Industry-specific terminology (e.g. CTET, CBSE, Tally Prime, GSTR-3B, ACLS, ICU ventilator protocols, AWS, etc.) must NEVER become invented candidate facts.
+2. Do NOT add CTET unless the resume/job context explicitly supports it.
+3. Do NOT claim Tally Prime experience unless the candidate's resume supports it.
+4. Do NOT claim ACLS, ventilator, GSTR-3B, CBSE experience, certifications, tools, metrics, or responsibilities unless supported by the source resume or explicitly provided by the user.
+5. When useful but unsupported, phrase it as a suggestion (e.g., "Consider adding this if applicable") — NOT as a factual resume statement.
+6. Missing keywords are suggestions for the candidate to consider ONLY if applicable, NOT fabricated candidate skills.
+7. NEVER invent or assume:
+   - Years of experience (e.g. do NOT say "5+ years of experience" unless explicitly stated)
+   - Seniorities or job titles
+   - Companies or employers
+   - Production metrics, customer figures, pass rates, or revenue numbers.
 
 RESUME UNDERSTANDING:
 1. Industry: "${effectiveIndustry}"
 2. Candidate's actual level: "${level}" (Is student/fresher: ${isStudentOrFresher})
 3. Target role to evaluate: "${targetRole}"
-4. Multilingual Terminology: Understand terms in Indian languages (Hindi, Bengali, Telugu, Tamil, Marathi, etc.) alongside English.
+4. Multilingual Terminology: Understand semantic concepts in Indian languages (Hindi, Bengali, Telugu, Tamil, Marathi, etc.) alongside English without requiring literal word-for-word translation.
 5. Job Description: ${jobDescription ? `"${jobDescription.slice(0, 2000)}"` : "None provided (use general industry ATS readiness standard)"}
 
 OUTPUT REQUIREMENTS:
 - atsScore: Honest, realistic AI ATS readiness estimate (integer 50-98).
 - matchAssessment: Sentence starting with "AI ATS Estimate: " assessing alignment with ${targetRole} in ${effectiveIndustry}.
-- presentKeywords: Array of skills/competencies the candidate possesses in the resume.
-- recommendedKeywords: 4-6 relevant industry competencies for ${effectiveIndustry} recommended to consider if applicable (missing from resume).
+- presentKeywords: Array of skills/competencies the candidate actually possesses in the resume.
+- recommendedKeywords: 4-6 relevant industry competencies for ${effectiveIndustry} recommended to "Consider adding if applicable" (missing from resume).
 - breakdown: Detailed sub-scores (0-100) for keywordMatch, skillsMatch, titleAlignment, experienceAlignment, educationAlignment, formattingReadability.
-- insights: Practical suggestions tailored to ${effectiveIndustry}. NEVER suggest fake numbers!
-- summaryOptimization: Truthful 2-3 sentence optimized summary adapted to ${effectiveIndustry}.`;
+- insights: Practical suggestions tailored to ${effectiveIndustry}. When recommending tools/certifications, phrase as suggestions ("Consider adding X if applicable").
+- summaryOptimization: Truthful 2-3 sentence optimized summary adapted to ${effectiveIndustry} grounded strictly in verified candidate facts.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3.7-flash",

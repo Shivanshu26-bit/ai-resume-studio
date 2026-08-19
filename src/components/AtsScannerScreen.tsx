@@ -570,7 +570,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                 </div>
 
                 <p className="text-[12px] text-slate-500">
-                  Click to add keywords you legitimately possess into your resume skills:
+                  Suggested industry competencies (Consider adding only if you legitimately possess this skill):
                 </p>
 
                 <div className="flex flex-wrap gap-1.5">
