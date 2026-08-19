@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Resume, WorkExperience, EducationItem, ProjectItem, BottomNavTab } from "../types";
+import {
+  Resume,
+  WorkExperience,
+  EducationItem,
+  ProjectItem,
+  BottomNavTab,
+  SUPPORTED_INDUSTRIES,
+  SUPPORTED_LANGUAGES,
+  ResumeClassification,
+} from "../types";
 import { TopAppBar } from "./TopAppBar";
 import { demoAlexChenData } from "../data/mockResumes";
 import { ResumeDocument } from "./ResumeDocument";
@@ -7,6 +16,7 @@ import { JobMatcherModal } from "./JobMatcherModal";
 import { SummaryAiModal } from "./SummaryAiModal";
 import { BulletEnhancerModal } from "./BulletEnhancerModal";
 import { ProjectEnhancerModal } from "./ProjectEnhancerModal";
+import { Briefcase, Globe, Sparkles, ChevronDown, Check } from "lucide-react";
 
 type BuilderSectionId = "personal" | "summary" | "experience" | "projects" | "education" | "skills" | "templates";
 
@@ -334,6 +344,70 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
                 </span>
                 <span>{isSaving ? "Saving..." : saveSuccessNotice ? "Saved!" : "Save"}</span>
               </button>
+            </div>
+          </div>
+
+          {/* Domain & Multilingual Intelligence Selector */}
+          <div className="bg-gradient-to-r from-indigo-50/90 via-blue-50/40 to-slate-50 border border-indigo-100/90 rounded-2xl p-3.5 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+                <Briefcase className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-[12px] font-bold text-slate-900 block leading-tight">
+                  Domain &amp; Language Intelligence
+                </span>
+                <span className="text-[11px] text-slate-500">
+                  Controls AI vocabulary, ATS rules, and summary suggestions
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap self-stretch sm:self-auto">
+              <select
+                value={resume.classification?.industry || "Education / Teaching"}
+                onChange={(e) => {
+                  const updatedClassification: ResumeClassification = {
+                    ...(resume.classification || {
+                      profession: resume.targetRole || "Professional",
+                      roleLevel: "Experienced",
+                    }),
+                    industry: e.target.value,
+                    language: resume.preferredLanguage || "English",
+                  };
+                  onChange({ ...resume, classification: updatedClassification });
+                }}
+                className="bg-white border border-slate-300 rounded-xl px-2.5 py-1 text-[11.5px] font-semibold text-slate-800 outline-hidden focus:border-indigo-600 shadow-2xs"
+              >
+                {SUPPORTED_INDUSTRIES.map((ind) => (
+                  <option key={ind} value={ind}>
+                    {ind}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={resume.preferredLanguage || resume.classification?.language || "English"}
+                onChange={(e) => {
+                  const lang = e.target.value;
+                  const updatedClassification: ResumeClassification = {
+                    ...(resume.classification || {
+                      industry: "Education / Teaching",
+                      profession: resume.targetRole || "Professional",
+                      roleLevel: "Experienced",
+                    }),
+                    language: lang,
+                  };
+                  onChange({ ...resume, preferredLanguage: lang, classification: updatedClassification });
+                }}
+                className="bg-white border border-slate-300 rounded-xl px-2.5 py-1 text-[11.5px] font-semibold text-slate-800 outline-hidden focus:border-indigo-600 shadow-2xs"
+              >
+                {SUPPORTED_LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.label.split(" ")[0]}>
+                    {l.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -1337,6 +1411,8 @@ export const ResumeBuilderScreen: React.FC<ResumeBuilderScreenProps> = ({
         currentBullet={bulletModalData.currentBullet}
         jobTitle={bulletModalData.jobTitle}
         company={bulletModalData.company}
+        defaultIndustry={resume.classification?.industry || "Education / Teaching"}
+        defaultLanguage={resume.preferredLanguage || resume.classification?.language || "English"}
         onApply={handleApplyBullet}
       />
 

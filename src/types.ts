@@ -4,7 +4,7 @@ export interface PersonalInfo {
   email: string;
   phone: string;
   location: string;
-  linkedin: string;
+  linkedin?: string;
   github?: string;
   portfolio?: string;
   summary: string;
@@ -71,6 +71,8 @@ export interface ResumeAnalysis {
     originalDraft: string;
     aiOptimized: string;
   };
+  detectedDomain?: string;
+  detectedLanguage?: string;
 }
 
 export interface JobDescriptionAnalysis {
@@ -80,6 +82,8 @@ export interface JobDescriptionAnalysis {
   responsibilities: string[];
   experienceExpectations?: string[];
   educationRequirements?: string[];
+  detectedIndustry?: string;
+  detectedRole?: string;
 }
 
 export interface JobComparisonResult {
@@ -90,6 +94,8 @@ export interface JobComparisonResult {
     responsibilities: string[];
     experienceExpectations?: string;
     educationRequirements?: string;
+    detectedIndustry?: string;
+    detectedRole?: string;
   };
   comparison: {
     matchedSkills: string[];
@@ -99,6 +105,15 @@ export interface JobComparisonResult {
     estimatedMatchPercentage: number;
     recommendations: string[];
   };
+}
+
+export interface ResumeClassification {
+  language: string;
+  secondaryLanguages?: string[];
+  industry: string;
+  profession: string;
+  roleLevel: string; // "Student" | "Fresher" | "Entry-level" | "Mid-level" | "Experienced" | "Senior" | "Executive"
+  confidence: number; // 0.0 to 1.0 (AI Estimate)
 }
 
 export interface Resume {
@@ -117,6 +132,9 @@ export interface Resume {
   projects?: ProjectItem[];
   certifications?: string[];
   achievements?: string[];
+  languages?: string[];
+  classification?: ResumeClassification;
+  preferredLanguage?: string;
   analysis?: ResumeAnalysis;
   storagePdfUrl?: string;
   storageResumeFileUrl?: string;
@@ -147,5 +165,42 @@ export interface UserProfile {
   isLoggedIn: boolean;
   createdAt?: number;
   updatedAt?: number;
+  preferredLanguage?: string;
+  industry?: string;
 }
 
+export const SUPPORTED_LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "hi", label: "Hindi (हिन्दी)" },
+  { code: "bn", label: "Bengali (বাংলা)" },
+  { code: "te", label: "Telugu (తెలుగు)" },
+  { code: "mr", label: "Marathi (मराठी)" },
+  { code: "ta", label: "Tamil (தமிழ்)" },
+  { code: "gu", label: "Gujarati (ગુજરાતી)" },
+  { code: "kn", label: "Kannada (ಕನ್ನಡ)" },
+  { code: "ml", label: "Malayalam (മലയാളം)" },
+  { code: "or", label: "Odia (ଓଡ଼ିଆ)" },
+  { code: "pa", label: "Punjabi (ਪੰਜਾਬੀ)" },
+  { code: "as", label: "Assamese (অসমীয়া)" },
+  { code: "ur", label: "Urdu (اردو)" },
+];
+
+export const SUPPORTED_INDUSTRIES = [
+  "Education / Teaching",
+  "Healthcare / Nursing / Medicine / Pharmacy",
+  "Finance / Accounting / Banking",
+  "Sales / Marketing / Retail",
+  "Customer Service / Support",
+  "Hospitality / Tourism / Culinary",
+  "Government / Public Sector / Legal",
+  "Civil / Mechanical / Electrical / Manufacturing",
+  "Architecture / Interior / Urban Design",
+  "Media / Journalism / Content / Publishing",
+  "Information Technology / Software / Data / AI",
+  "Agriculture / Forestry / Rural Development",
+  "Logistics / Supply Chain / Warehouse",
+  "Human Resources / Administration",
+  "Nonprofit / NGO / Social Work",
+  "Skilled Trades / Technician / Maintenance",
+  "Other Professions",
+];

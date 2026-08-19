@@ -1,6 +1,7 @@
 import React from "react";
 import { Resume, UserProfile, BottomNavTab } from "../types";
 import { TopAppBar } from "./TopAppBar";
+import { Sparkles, UploadCloud, Plus, FileText, Globe, Target, CheckCircle2, BookOpen, Calculator, HeartPulse, ShoppingBag, Terminal } from "lucide-react";
 
 interface HomeScreenProps {
   user: UserProfile;
@@ -8,6 +9,7 @@ interface HomeScreenProps {
   onSelectResume: (resume: Resume) => void;
   onNewResume: () => void;
   onOpenScanner: (resume?: Resume) => void;
+  onOpenUpload?: () => void;
   onViewAllHistory: () => void;
   onOpenSettings: () => void;
   onExportPdf?: (resume: Resume) => void;
@@ -20,6 +22,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onSelectResume,
   onNewResume,
   onOpenScanner,
+  onOpenUpload,
   onViewAllHistory,
   onOpenSettings,
   onExportPdf,
@@ -50,7 +53,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
       <main className="w-full max-w-5xl px-4 sm:px-6 py-6 sm:py-8 flex flex-col gap-8">
         {/* 1. Hero Welcome Header */}
-        <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-br from-white to-indigo-50/40 p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs">
+        <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-br from-white via-indigo-50/30 to-purple-50/20 p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs">
           <div className="flex flex-col gap-1.5 max-w-2xl">
             <div className="flex items-center gap-2">
               <h1 className="text-[26px] sm:text-[32px] font-extrabold text-slate-900 tracking-tight leading-tight">
@@ -58,11 +61,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </h1>
             </div>
             <p className="text-[15px] sm:text-[16px] text-slate-600 leading-relaxed font-normal">
-              Build a professional resume or check how well your resume matches a job.
+              Build a professional resume or check ATS alignment across Indian and global professions.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
             <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 text-[12px] font-mono font-semibold shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               Cloud Sync Active
@@ -70,7 +73,34 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </section>
 
-        {/* 2. Two Primary Feature Cards (Equal Prominence) */}
+        {/* 2. Multilingual & Multi-Industry Intelligence Showcase Pill */}
+        <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-700 border border-indigo-100 shrink-0">
+              <Globe className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-[13px] font-bold text-slate-900 block">
+                India-First & Global Industry Intelligence
+              </span>
+              <p className="text-[12px] text-slate-500">
+                Tailored for Education (PGT/TGT), Healthcare, Finance/GST, Sales, Tech & 12+ Indian Languages
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1.5 self-stretch sm:self-auto">
+            {["Hindi (हिन्दी)", "Teaching / B.Ed", "Tally & GST", "Nursing (KNC)", "Tech & IT"].map((tag) => (
+              <span
+                key={tag}
+                className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 font-semibold"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. Two Primary Feature Cards (Equal Prominence + Direct Upload Flow) */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
           {/* Feature Card 1: Resume Builder */}
           <div
@@ -92,12 +122,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <h2 className="text-[21px] font-bold text-slate-900 tracking-tight mb-1.5">
                 Resume Builder
               </h2>
-              <p className="text-[14px] text-slate-600 leading-relaxed mb-5 font-normal">
-                Create and customize your resume with AI assistance.
+              <p className="text-[14px] text-slate-600 leading-relaxed mb-4 font-normal">
+                Create from scratch or upload your existing resume (PDF/DOCX) with AI extraction.
               </p>
 
               {/* Visual Template Chips Indicator */}
-              <div className="flex flex-wrap gap-1.5 mb-6">
+              <div className="flex flex-wrap gap-1.5 mb-5">
                 {["Modern", "Classic", "Minimal", "Executive"].map((tpl) => (
                   <span
                     key={tpl}
@@ -110,22 +140,33 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </div>
 
             <div className="flex flex-col gap-2.5 pt-4 border-t border-slate-100">
-              <button
-                id="home-create-resume-primary-btn"
-                onClick={onNewResume}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[14px] px-5 py-3 rounded-full flex items-center justify-center gap-2 shadow-md shadow-indigo-500/20 active:scale-98 transition-all cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[19px]">add</span>
-                Build Resume
-              </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button
+                  id="home-create-resume-primary-btn"
+                  onClick={onNewResume}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[13.5px] px-4 py-3 rounded-full flex items-center justify-center gap-2 shadow-md shadow-indigo-500/20 active:scale-98 transition-all cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  Start Blank
+                </button>
+
+                <button
+                  id="home-upload-resume-btn"
+                  onClick={onOpenUpload || onNewResume}
+                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-[13.5px] px-4 py-3 rounded-full flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
+                >
+                  <UploadCloud className="w-4 h-4" />
+                  Upload Resume
+                </button>
+              </div>
 
               <button
                 id="home-view-my-resumes-btn"
                 onClick={onViewAllHistory}
-                className="w-full text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/60 font-semibold text-[13px] py-2.5 rounded-full flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                className="w-full text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/60 font-semibold text-[13px] py-2 rounded-full flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[17px]">folder_open</span>
-                View My Resumes ({resumes.length})
+                View Saved Resumes ({resumes.length})
               </button>
             </div>
           </div>
@@ -150,13 +191,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <h2 className="text-[21px] font-bold text-slate-900 tracking-tight mb-1.5">
                 ATS Scanner
               </h2>
-              <p className="text-[14px] text-slate-600 leading-relaxed mb-5 font-normal">
-                Check your resume against a job description and discover improvements.
+              <p className="text-[14px] text-slate-600 leading-relaxed mb-4 font-normal">
+                Check alignment against job descriptions with domain-specific keyword indexing.
               </p>
 
               {/* Highlights */}
-              <div className="flex flex-wrap gap-1.5 mb-6">
-                {["Keyword Gaps", "Job Match %", "STAR Bullet Check"].map((item) => (
+              <div className="flex flex-wrap gap-1.5 mb-5">
+                {["Industry Keywords", "Job Match %", "Multilingual Term Search"].map((item) => (
                   <span
                     key={item}
                     className="text-[11px] font-mono px-2.5 py-0.5 rounded-md bg-purple-50/80 text-purple-700 border border-purple-200/70 font-medium"
@@ -168,34 +209,44 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </div>
 
             <div className="flex flex-col gap-2.5 pt-4 border-t border-slate-100">
-              <button
-                id="home-scan-resume-primary-btn"
-                onClick={() => onOpenScanner(resumes[0])}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-[14px] px-5 py-3 rounded-full flex items-center justify-center gap-2 shadow-md shadow-purple-500/20 active:scale-98 transition-all cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[19px]">auto_awesome</span>
-                Scan Resume
-              </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button
+                  id="home-scan-resume-primary-btn"
+                  onClick={() => onOpenScanner(resumes[0])}
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-[13.5px] px-4 py-3 rounded-full flex items-center justify-center gap-2 shadow-md shadow-purple-500/20 active:scale-98 transition-all cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Scan Active
+                </button>
+
+                <button
+                  onClick={() => onOpenScanner()}
+                  className="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold text-[13.5px] px-4 py-3 rounded-full flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
+                >
+                  <Target className="w-4 h-4" />
+                  Compare with JD
+                </button>
+              </div>
 
               <button
-                onClick={() => onOpenScanner(resumes[0])}
-                className="w-full text-slate-700 hover:text-purple-600 hover:bg-purple-50/60 font-semibold text-[13px] py-2.5 rounded-full flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                onClick={onOpenUpload || (() => onOpenScanner())}
+                className="w-full text-slate-700 hover:text-purple-600 hover:bg-purple-50/60 font-semibold text-[13px] py-2 rounded-full flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[17px]">target</span>
-                Paste Target Job Post
+                <UploadCloud className="w-4 h-4" />
+                Upload New File to Scan
               </button>
             </div>
           </div>
         </section>
 
-        {/* 3. Quick Stats / Metrics Row */}
+        {/* 4. Quick Stats / Metrics Row */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Metric 1: Total Resumes */}
           <div
             id="stat-created-card"
             className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/80 flex items-center gap-4 hover:border-indigo-200 transition-colors"
           >
-            <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 flex-shrink-0 border border-indigo-100">
+            <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0 border border-indigo-100">
               <span className="material-symbols-outlined text-[24px]">folder</span>
             </div>
             <div>
@@ -213,7 +264,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             id="stat-ats-score-card"
             className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/80 flex items-center gap-4 hover:border-emerald-200 transition-colors"
           >
-            <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
+            <div className="relative w-12 h-12 shrink-0 flex items-center justify-center">
               <svg className="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                 <path
                   className="text-slate-100 stroke-current"
@@ -249,7 +300,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             id="stat-updated-card"
             className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/80 flex items-center gap-4 hover:border-slate-300 transition-colors"
           >
-            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 flex-shrink-0 border border-slate-200">
+            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 shrink-0 border border-slate-200">
               <span className="material-symbols-outlined text-[24px]">schedule</span>
             </div>
             <div>
@@ -263,7 +314,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </section>
 
-        {/* 4. Recent Resumes Section */}
+        {/* 5. Recent Resumes Section */}
         <section className="flex flex-col gap-4">
           <div className="flex justify-between items-center px-1">
             <div>
@@ -288,7 +339,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           {resumes.length === 0 ? (
-            /* Elegant Empty State */
+            /* Empty State */
             <div className="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/90 text-center flex flex-col items-center gap-3.5 shadow-xs">
               <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
                 <span className="material-symbols-outlined text-[32px]">post_add</span>
@@ -298,7 +349,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   No resumes yet
                 </h3>
                 <p className="text-[14px] text-slate-600 mt-1">
-                  Start building your first professional resume with real-time AI assistance.
+                  Start building your first professional resume or upload an existing file.
                 </p>
               </div>
 
@@ -311,21 +362,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   Create Resume
                 </button>
                 <button
-                  onClick={() => onOpenScanner()}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-[13.5px] font-bold px-5 py-2.5 rounded-full transition-all cursor-pointer"
+                  onClick={onOpenUpload || onNewResume}
+                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[13.5px] font-bold px-5 py-2.5 rounded-full transition-all cursor-pointer"
                 >
-                  Scan an Existing Resume
+                  Upload Existing File
                 </button>
               </div>
             </div>
           ) : (
-            /* Attractive Resume Cards */
+            /* Resume Cards */
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {resumes.slice(0, 4).map((resume) => {
                 const score = resume.atsScore || 75;
                 const isHigh = score >= 80;
                 const isMedium = score >= 65 && score < 80;
                 const templateName = resume.selectedTemplate || "Modern";
+                const industryName = resume.classification?.industry || "Professional";
 
                 return (
                   <div
@@ -342,19 +394,26 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                           >
                             {resume.title}
                           </h3>
-                          <p className="text-[13px] font-semibold text-indigo-600 font-mono mt-0.5">
-                            {resume.targetRole || "General"}
-                          </p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[12.5px] font-semibold text-indigo-600 font-mono">
+                              {resume.targetRole || "General"}
+                            </span>
+                            {resume.preferredLanguage && resume.preferredLanguage !== "English" && (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 border border-orange-200 font-bold">
+                                {resume.preferredLanguage}
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         {/* Template Badge */}
-                        <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 flex-shrink-0">
+                        <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 shrink-0">
                           {templateName}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between text-[11.5px] text-slate-500 font-mono pt-1">
-                        <span>Last updated: {resume.lastEdited || "Recently"}</span>
+                        <span>Updated: {resume.lastEdited || "Recently"}</span>
                         <div className="flex items-center gap-1">
                           <span
                             className={`px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1 border ${

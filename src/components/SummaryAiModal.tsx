@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Resume } from "../types";
+import { Resume, SUPPORTED_INDUSTRIES, SUPPORTED_LANGUAGES } from "../types";
+import { Sparkles, X, RefreshCw, Check, AlertCircle, Briefcase, Globe } from "lucide-react";
 
 interface SummaryAiModalProps {
   isOpen: boolean;
@@ -18,6 +19,13 @@ export const SummaryAiModal: React.FC<SummaryAiModalProps> = ({
   const [generatedSummary, setGeneratedSummary] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
+  const [industry, setIndustry] = useState(
+    resume.classification?.industry || "Education / Teaching"
+  );
+  const [preferredLanguage, setPreferredLanguage] = useState(
+    resume.preferredLanguage || resume.classification?.language || "English"
+  );
+
   if (!isOpen) return null;
 
   const handleGenerate = async () => {
@@ -29,7 +37,10 @@ export const SummaryAiModal: React.FC<SummaryAiModalProps> = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           draft: resume.personal.summary,
-          targetRole: resume.targetRole || "Software Developer",
+          targetRole: resume.targetRole || resume.classification?.profession || "Professional",
+          industry,
+          preferredLanguage,
+          roleLevel: resume.classification?.roleLevel || "Experienced",
           resumeData: resume,
           skills: resume.skills,
           experience: resume.experiences,
@@ -59,16 +70,16 @@ export const SummaryAiModal: React.FC<SummaryAiModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5">
-      <div className="bg-white rounded-3xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-3xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200 animate-scale-up">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-700 to-purple-800 px-6 py-4 flex items-center justify-between text-white flex-shrink-0">
+        <div className="bg-gradient-to-r from-indigo-700 via-indigo-800 to-purple-800 px-6 py-4 flex items-center justify-between text-white shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center">
-              <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
+              <Sparkles className="w-4 h-4" />
             </div>
             <div>
               <h2 className="text-[17px] font-bold tracking-tight">AI Professional Summary</h2>
-              <p className="text-[12px] text-indigo-200">Truthful, ATS-optimized summary generation</p>
+              <p className="text-[12px] text-indigo-200">Domain-tailored, truthful ATS summary generation</p>
             </div>
           </div>
           <button
@@ -76,12 +87,51 @@ export const SummaryAiModal: React.FC<SummaryAiModalProps> = ({
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]">close</span>
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content */}
         <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-4">
+          {/* Industry & Language Context Selection */}
+          <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div>
+              <label className="text-[11px] font-bold text-slate-600 flex items-center gap-1 mb-1">
+                <Briefcase className="w-3 h-3 text-indigo-600" />
+                Industry / Sector
+              </label>
+              <select
+                value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-[12px] text-slate-800 font-medium outline-hidden focus:border-indigo-600"
+              >
+                {SUPPORTED_INDUSTRIES.map((ind) => (
+                  <option key={ind} value={ind}>
+                    {ind}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold text-slate-600 flex items-center gap-1 mb-1">
+                <Globe className="w-3 h-3 text-indigo-600" />
+                Language
+              </label>
+              <select
+                value={preferredLanguage}
+                onChange={(e) => setPreferredLanguage(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-[12px] text-slate-800 font-medium outline-hidden focus:border-indigo-600"
+              >
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <option key={lang.code} value={lang.label.split(" ")[0]}>
+                    {lang.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           {/* Current Summary */}
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
             <span className="text-[11px] font-mono font-bold text-slate-500 uppercase tracking-wider block mb-1">
@@ -98,15 +148,15 @@ export const SummaryAiModal: React.FC<SummaryAiModalProps> = ({
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-mono font-bold text-indigo-800 uppercase tracking-wider flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-indigo-600" />
-                  AI-Generated Proposal
+                  AI-Generated Proposal ({preferredLanguage})
                 </span>
                 <button
                   type="button"
                   onClick={handleGenerate}
                   disabled={isGenerating}
-                  className="text-indigo-600 hover:text-indigo-800 text-[12px] font-bold flex items-center gap-1 font-mono"
+                  className="text-indigo-600 hover:text-indigo-800 text-[12px] font-bold flex items-center gap-1 font-mono cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[15px]">refresh</span>
+                  <RefreshCw className="w-3 h-3" />
                   Regenerate
                 </button>
               </div>
@@ -122,15 +172,13 @@ export const SummaryAiModal: React.FC<SummaryAiModalProps> = ({
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 rounded-2xl text-center gap-3">
-              <span className="material-symbols-outlined text-[36px] text-indigo-400">
-                psychology
-              </span>
+              <Sparkles className="w-8 h-8 text-indigo-400" />
               <div>
                 <h4 className="text-[14px] font-bold text-slate-800">
-                  Ready to craft an ATS-tailored summary?
+                  Ready to craft a domain-tailored summary?
                 </h4>
                 <p className="text-[12px] text-slate-500 max-w-sm mt-0.5">
-                  Gemini AI will synthesize your skills and actual experience without fabricating false metrics.
+                  AI synthesizes your skills and verified experience for {industry} in {preferredLanguage} without inventing false facts.
                 </p>
               </div>
             </div>
@@ -138,14 +186,14 @@ export const SummaryAiModal: React.FC<SummaryAiModalProps> = ({
 
           {errorMsg && (
             <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-[13px] flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">error</span>
+              <AlertCircle className="w-4 h-4 shrink-0" />
               {errorMsg}
             </div>
           )}
         </div>
 
         {/* Actions */}
-        <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 flex-shrink-0">
+        <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 shrink-0">
           <button
             type="button"
             onClick={onClose}
@@ -168,7 +216,7 @@ export const SummaryAiModal: React.FC<SummaryAiModalProps> = ({
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
+                  <Sparkles className="w-4 h-4" />
                   <span>Generate with AI</span>
                 </>
               )}
@@ -180,7 +228,7 @@ export const SummaryAiModal: React.FC<SummaryAiModalProps> = ({
               onClick={handleApply}
               className="px-6 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] font-bold shadow-md flex items-center gap-1.5 transition-all cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[16px]">check</span>
+              <Check className="w-4 h-4" />
               <span>Apply to Resume</span>
             </button>
           )}

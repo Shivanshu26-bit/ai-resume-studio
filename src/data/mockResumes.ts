@@ -4,32 +4,307 @@ export const defaultUserProfile: UserProfile = {
   name: "Meena Shukla",
   email: "Meenashukla3211@gmail.com",
   avatarUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuA4owbeln06ShcDmz939csO4HP6hzVZM6zVggGvxGEQw4FIRCTKQZDhRNK6MSMN64wjkCNm6wzi5HXMqrVZ20AUdTMt6B6BAy3gpwN-zSMKMA_pY5y94k7x7CgBudSNEIxt9npwlQslnrDqTlZxF32bivGPSvTn5jgffZKw3vV01BeNPSCI4A8JL9nb54CB7zbRt5jWbmah6ES8kS8HHsyDrukhzs9KrOOIECWcQKOPt0lnhnULEveK",
-  targetRole: "Senior Android Engineer",
+  targetRole: "Senior Hindi Teacher (PGT)",
   yearsOfExp: 6,
   isLoggedIn: true,
+  preferredLanguage: "Hindi (हिन्दी)",
+  industry: "Education / Teaching",
 };
 
 export const sampleResumes: Resume[] = [
   {
+    id: "res-hindi-teacher",
+    title: "PGT Hindi & Sanskrit Teacher",
+    targetRole: "Senior Hindi Teacher (PGT)",
+    lastEdited: "10 mins ago",
+    updatedAt: Date.now() - 600000,
+    atsScore: 88,
+    selectedTemplate: "classic",
+    preferredLanguage: "Hindi",
+    classification: {
+      language: "Hindi",
+      secondaryLanguages: ["English", "Sanskrit"],
+      industry: "Education / Teaching",
+      profession: "PGT Hindi Teacher",
+      roleLevel: "Experienced",
+      confidence: 0.94,
+    },
+    personal: {
+      firstName: "Sunita",
+      lastName: "Sharma",
+      email: "sunita.sharma.edu@example.com",
+      phone: "+91 98765 43210",
+      location: "New Delhi, India",
+      summary: "Dedicated PGT Hindi & Sanskrit Educator with over 7 years of teaching experience across CBSE and State Board affiliated secondary schools. Proven track record in Hindi literature pedagogy, classroom management, board examination preparation, and fostering creative student writing.",
+    },
+    experiences: [
+      {
+        id: "exp-teach-1",
+        title: "PGT Hindi Teacher",
+        company: "Delhi Public Senior Secondary School",
+        location: "New Delhi",
+        startDate: "2020",
+        endDate: "Present",
+        current: true,
+        bullets: [
+          "Instructed Senior Secondary classes (Class 9 to 12) in Hindi Core and Hindi Literature aligned with CBSE curriculum guidelines.",
+          "Conducted comprehensive lesson planning, diagnostic assessments, and student progress tracking for board examination batches.",
+          "Organized inter-school Hindi debate (वाद-विवाद), poetry recitation (काव्य पाठ), and annual Hindi Diwas cultural celebrations.",
+          "Facilitated parent-teacher meetings and provided individual counseling for students needing language comprehension support.",
+        ],
+      },
+      {
+        id: "exp-teach-2",
+        title: "TGT Hindi & Sanskrit Teacher",
+        company: "Kendriya Vidyalaya Sangathan",
+        location: "Jaipur, Rajasthan",
+        startDate: "2017",
+        endDate: "2020",
+        current: false,
+        bullets: [
+          "Delivered interactive Hindi and Sanskrit grammar lessons using audio-visual classroom aids and NCERT pedagogy standards.",
+          "Designed term-end examination papers, evaluated answer sheets, and prepared student academic performance reports.",
+          "Managed co-curricular activities, including school literary club and creative writing workshops.",
+        ],
+      },
+    ],
+    education: [
+      {
+        id: "edu-teach-1",
+        degree: "Master of Arts (M.A.) in Hindi Literature",
+        school: "Delhi University",
+        location: "New Delhi",
+        year: "2016",
+      },
+      {
+        id: "edu-teach-2",
+        degree: "Bachelor of Education (B.Ed.)",
+        school: "Jamia Millia Islamia",
+        location: "New Delhi",
+        year: "2017",
+      },
+    ],
+    skills: [
+      "Hindi Literature & Pedagogy",
+      "CBSE Curriculum & NCERT Guidelines",
+      "Lesson Planning (पाठ योजना)",
+      "Classroom Management (कक्षा प्रबंधन)",
+      "Board Exam Preparation",
+      "Student Assessment & Evaluation",
+      "Sanskrit Grammar",
+      "Educational Technology & Smart Boards",
+    ],
+    certifications: [
+      "Central Teacher Eligibility Test (CTET) - Paper II Qualified",
+      "CBSE Capacity Building Programme on Hindi Teaching Pedagogy",
+    ],
+    languages: ["Hindi (Native)", "English (Professional)", "Sanskrit (Proficient)"],
+    analysis: {
+      atsScore: 88,
+      targetRole: "Senior Hindi Teacher (PGT)",
+      matchAssessment: "AI ATS Estimate: 88% alignment for Senior Hindi Teacher (PGT) roles in CBSE and ICSE educational institutions.",
+      presentKeywords: [
+        "Hindi Literature",
+        "CBSE Curriculum",
+        "Lesson Planning",
+        "Classroom Management",
+        "CTET Qualified",
+        "B.Ed.",
+      ],
+      recommendedKeywords: [
+        "Experiential Learning (NEP 2020)",
+        "Remedial Teaching Strategies",
+        "Art-Integrated Learning",
+        "Formative Assessment Tools",
+      ],
+      insights: [
+        {
+          title: "Highlight NEP 2020 Pedagogical Practices",
+          description: "Consider mentioning activity-based or multilingual learning methodologies in line with NEP 2020 guidelines.",
+          type: "lightbulb",
+        },
+        {
+          title: "Emphasize Board Result Impact",
+          description: "If verifiable, highlight specific batch pass percentages or student distinction rates in Class 10/12 board exams.",
+          type: "trending_up",
+        },
+      ],
+      summaryOptimization: {
+        originalDraft: "Dedicated PGT Hindi & Sanskrit Educator with over 7 years of teaching experience across CBSE schools.",
+        aiOptimized: "Accomplished PGT Hindi Educator (CTET Qualified, M.A., B.Ed.) with 7+ years of expertise delivering CBSE-aligned language and literature curricula. Skilled in modern pedagogy, board exam preparation, classroom engagement, and fostering bilingual academic excellence.",
+      },
+    },
+  },
+  {
+    id: "res-accountant",
+    title: "Senior Accountant & Tax Specialist",
+    targetRole: "Senior Accountant / GST Specialist",
+    lastEdited: "1 hour ago",
+    updatedAt: Date.now() - 3600000,
+    atsScore: 84,
+    selectedTemplate: "executive",
+    preferredLanguage: "English",
+    classification: {
+      language: "English",
+      secondaryLanguages: ["Hindi"],
+      industry: "Finance / Accounting / Banking",
+      profession: "Senior Accountant",
+      roleLevel: "Experienced",
+      confidence: 0.92,
+    },
+    personal: {
+      firstName: "Rajesh",
+      lastName: "Gupta",
+      email: "rajesh.gupta.acct@example.com",
+      phone: "+91 99887 76655",
+      location: "Mumbai, Maharashtra, India",
+      summary: "Detail-oriented Senior Accountant with 5+ years managing accounts payable/receivable, ledger reconciliations, GST return filing (GSTR-1, GSTR-3B), TDS compliance, and Tally Prime reporting for corporate enterprises.",
+    },
+    experiences: [
+      {
+        id: "exp-acct-1",
+        title: "Senior Accountant",
+        company: "Apex Commercial Logistics Pvt. Ltd.",
+        location: "Mumbai",
+        startDate: "2021",
+        endDate: "Present",
+        current: true,
+        bullets: [
+          "Supervised daily financial transactions, ledger maintenance, and bank reconciliations using Tally Prime and Advanced MS Excel.",
+          "Prepared and filed monthly GST returns (GSTR-1, GSTR-3B, GSTR-9) and quarterly TDS returns (24Q, 26Q) ensuring zero penalty incidence.",
+          "Generated monthly balance sheets, profit & loss statements, and cash flow reports for executive management reviews.",
+          "Coordinated internal and statutory audit queries with external Chartered Accountant firms.",
+        ],
+      },
+    ],
+    education: [
+      {
+        id: "edu-acct-1",
+        degree: "Master of Commerce (M.Com - Advanced Accountancy)",
+        school: "University of Mumbai",
+        location: "Mumbai",
+        year: "2019",
+      },
+      {
+        id: "edu-acct-2",
+        degree: "Bachelor of Commerce (B.Com)",
+        school: "R.A. Podar College of Commerce and Economics",
+        location: "Mumbai",
+        year: "2017",
+      },
+    ],
+    skills: [
+      "Tally Prime & Tally ERP 9",
+      "GST Filing (GSTR-1, 3B, 9)",
+      "TDS & Income Tax Compliance",
+      "Bank Reconciliation Statement (BRS)",
+      "Advanced Excel (VLOOKUP, Pivot, Macros)",
+      "Financial Reporting & Balance Sheets",
+      "Accounts Payable & Receivable (AP/AR)",
+      "Statutory Audit Assistance",
+    ],
+    certifications: [
+      "Certified GST Practitioner (MSME / ICAI)",
+      "Tally Professional Certification",
+    ],
+    languages: ["English (Fluent)", "Hindi (Fluent)", "Marathi (Working)"],
+  },
+  {
+    id: "res-staff-nurse",
+    title: "Staff Nurse (ICU & Critical Care)",
+    targetRole: "Staff Nurse (ICU / Critical Care)",
+    lastEdited: "3 hours ago",
+    updatedAt: Date.now() - 10800000,
+    atsScore: 86,
+    selectedTemplate: "modern",
+    preferredLanguage: "English",
+    classification: {
+      language: "English",
+      secondaryLanguages: ["Hindi", "Malayalam"],
+      industry: "Healthcare / Nursing / Medicine / Pharmacy",
+      profession: "Staff Nurse (Critical Care)",
+      roleLevel: "Experienced",
+      confidence: 0.95,
+    },
+    personal: {
+      firstName: "Priya",
+      lastName: "Nair",
+      email: "priya.nair.nurse@example.com",
+      phone: "+91 97654 32109",
+      location: "Bengaluru, Karnataka, India",
+      summary: "Compassionate, registered Staff Nurse (B.Sc Nursing, KNC Registered) with 4+ years of Intensive Care Unit (ICU) and Emergency ward clinical experience. Skilled in patient triage, hemodynamic monitoring, IV cannula insertion, ventilator management, and emergency resuscitation protocols.",
+    },
+    experiences: [
+      {
+        id: "exp-nurse-1",
+        title: "Staff Nurse - Intensive Care Unit (ICU)",
+        company: "Manipal Hospital",
+        location: "Bengaluru",
+        startDate: "2021",
+        endDate: "Present",
+        current: true,
+        bullets: [
+          "Provided comprehensive nursing care to critically ill patients across medical and surgical ICU beds.",
+          "Monitored multi-parameter vital signs, ventilator settings, arterial lines, and administered doctor-prescribed emergency medications.",
+          "Maintained meticulous clinical documentation, electronic medical records (EMR), and nursing handover reports.",
+          "Assisted medical teams during cardiac arrests, central line insertions, and emergency intubation procedures.",
+        ],
+      },
+    ],
+    education: [
+      {
+        id: "edu-nurse-1",
+        degree: "Bachelor of Science in Nursing (B.Sc Nursing)",
+        school: "Rajiv Gandhi University of Health Sciences",
+        location: "Bengaluru",
+        year: "2020",
+      },
+    ],
+    skills: [
+      "Critical Care Nursing",
+      "Ventilator & Oxygen Management",
+      "IV Cannulation & Infusion Pumps",
+      "Hemodynamic Vital Monitoring",
+      "BLS & ACLS Protocols",
+      "Infection Control Standards (NABH)",
+      "Electronic Medical Records (EMR)",
+      "Patient & Family Counseling",
+    ],
+    certifications: [
+      "Karnataka State Nursing Council (KNC) Registered Nurse & Midwife",
+      "Basic Life Support (BLS) - American Heart Association (AHA)",
+    ],
+    languages: ["English (Fluent)", "Hindi (Fluent)", "Malayalam (Native)", "Kannada (Basic)"],
+  },
+  {
     id: "res-senior-dev",
-    title: "Senior Dev Resume",
+    title: "Senior Android Engineer",
     targetRole: "Senior Android Engineer",
-    lastEdited: "2 hours ago",
-    updatedAt: Date.now() - 7200000,
-    atsScore: 85,
+    lastEdited: "Yesterday",
+    updatedAt: Date.now() - 86400000,
+    atsScore: 90,
+    selectedTemplate: "minimal",
+    preferredLanguage: "English",
+    classification: {
+      language: "English",
+      industry: "Information Technology / Software / Data / AI",
+      profession: "Senior Android Engineer",
+      roleLevel: "Senior",
+      confidence: 0.96,
+    },
     personal: {
       firstName: "Alex",
       lastName: "Chen",
       email: "alex.chen@example.com",
-      phone: "(555) 987-6543",
+      phone: "+1 (555) 987-6543",
       location: "San Francisco, CA",
       linkedin: "https://linkedin.com/in/alexchen-dev",
       github: "https://github.com/alexchen",
-      summary: "Experienced Android developer looking for new opportunities. Worked with Java and some Kotlin. Built several apps and published them to the Play Store over the last 5 years.",
+      summary: "Senior Android Engineer with 6+ years specializing in Kotlin, Jetpack Compose, Coroutines, and scalable Clean Architecture. Proven background architecting high-throughput mobile applications and offline-first database systems.",
     },
     experiences: [
       {
-        id: "exp-1",
+        id: "exp-dev-1",
         title: "Senior Mobile Engineer",
         company: "Apex Tech Labs",
         location: "San Francisco, CA",
@@ -37,194 +312,86 @@ export const sampleResumes: Resume[] = [
         endDate: "Present",
         current: true,
         bullets: [
-          "Architected modern Android client using Kotlin, Jetpack Compose, and MVI architecture pattern for 500k+ active users.",
-          "Spearheaded multi-module migration reducing clean build time by 45% across a team of 14 mobile developers.",
-          "Integrated offline-first Room database and Ktor networking client with 99.9% crash-free user sessions."
+          "Architected modern Android client using Kotlin, Jetpack Compose, and MVI architecture for 500k+ active users.",
+          "Spearheaded multi-module architecture migration reducing clean build time by 45% across team of 14 mobile developers.",
+          "Integrated offline-first Room database and Ktor networking client maintaining 99.9% crash-free session metrics.",
         ],
       },
-      {
-        id: "exp-2",
-        title: "Android Developer",
-        company: "Vanguard Digital",
-        location: "San Jose, CA",
-        startDate: "2019",
-        endDate: "2021",
-        current: false,
-        bullets: [
-          "Developed core e-commerce checkout flow in Kotlin Coroutines, boosting successful conversion rate by 18%.",
-          "Implemented automated CI/CD GitHub Actions pipelines deploying signed release bundles directly to Google Play internal track.",
-          "Collaborated with UX and product teams to establish accessible Material 3 component design systems."
-        ],
-      }
     ],
     education: [
       {
-        id: "edu-1",
+        id: "edu-dev-1",
         degree: "B.S. in Computer Science",
         school: "University of California, Berkeley",
         location: "Berkeley, CA",
         year: "2019",
-      }
+      },
     ],
     skills: ["Kotlin", "Jetpack Compose", "Coroutines & Flow", "Hilt / Dagger", "Clean Architecture", "Room DB", "CI/CD", "Gradle"],
-    analysis: {
-      atsScore: 85,
-      targetRole: "Senior Android Engineer",
-      matchAssessment: "Excellent match for Senior Android Engineer roles.",
-      recommendedKeywords: ["Kotlin Coroutines", "Jetpack Compose", "Hilt", "CI/CD"],
-      insights: [
-        {
-          title: "Quantify Achievements",
-          description: "2 of your experience bullets lack metrics. Try adding percentage improvements or user counts.",
-          type: "trending_up"
-        },
-        {
-          title: "Strengthen Action Verbs",
-          description: "Replace passive phrases like 'Worked on' with 'Architected' or 'Spearheaded'.",
-          type: "sort_by_alpha"
-        }
-      ],
-      summaryOptimization: {
-        originalDraft: "Experienced Android developer looking for new opportunities. Worked with Java and some Kotlin. Built several apps and published them to the Play Store over the last 5 years.",
-        aiOptimized: "Results-driven Senior Android Engineer with 5+ years of experience specializing in Kotlin and modern architecture components. Proven track record of architecting scalable mobile applications, optimizing performance, and delivering high-impact solutions to the Play Store."
-      }
-    }
+    languages: ["English (Native)"],
   },
   {
-    id: "res-pm-cv",
-    title: "Product Manager CV",
-    targetRole: "Lead Product Manager",
-    lastEdited: "Yesterday",
-    updatedAt: Date.now() - 86400000,
-    atsScore: 62,
+    id: "res-sales-exec",
+    title: "Territory Sales & Business Development",
+    targetRole: "Area Sales Manager / Territory Executive",
+    lastEdited: "2 days ago",
+    updatedAt: Date.now() - 172800000,
+    atsScore: 82,
+    selectedTemplate: "modern",
+    preferredLanguage: "English",
+    classification: {
+      language: "English",
+      secondaryLanguages: ["Hindi"],
+      industry: "Sales / Marketing / Retail",
+      profession: "Area Sales Manager",
+      roleLevel: "Mid-level",
+      confidence: 0.91,
+    },
     personal: {
-      firstName: "Sarah",
-      lastName: "Jenkins",
-      email: "sarah.j@example.com",
-      phone: "(555) 432-8765",
-      location: "New York, NY",
-      linkedin: "https://linkedin.com/in/sarahjenkins-pm",
-      summary: "Product manager with experience managing roadmaps, leading sprints, and working with engineering and design teams.",
+      firstName: "Vikas",
+      lastName: "Verma",
+      email: "vikas.verma.sales@example.com",
+      phone: "+91 98111 22334",
+      location: "Lucknow, Uttar Pradesh, India",
+      summary: "Proactive Area Sales Executive with 4+ years of B2B and FMCG retail distribution experience. Proven competence in dealer distributor network expansion, lead conversion, territory revenue targets, and CRM pipeline management.",
     },
     experiences: [
       {
-        id: "exp-pm-1",
-        title: "Product Manager",
-        company: "FinTech Orbit",
-        location: "New York, NY",
-        startDate: "2022",
+        id: "exp-sales-1",
+        title: "Territory Sales Executive",
+        company: "Vardhman Consumer Goods Ltd.",
+        location: "Lucknow",
+        startDate: "2021",
         endDate: "Present",
         current: true,
         bullets: [
-          "Led roadmap planning for consumer payment products.",
-          "Worked with developers to launch new onboarding features.",
-          "Analyzed customer feedback to prioritize sprint backlogs."
+          "Managed distribution operations across 120+ retail outlets and authorized stockists across Eastern UP territory.",
+          "Consistently exceeded monthly sales targets, driving new dealer onboarding and product line penetration.",
+          "Organized merchant promotional campaigns, point-of-sale branding, and product sampling events.",
+          "Tracked daily sales reporting (DSR), collections, and stock inventory replenishment using CRM mobile application.",
         ],
-      }
+      },
     ],
     education: [
       {
-        id: "edu-pm-1",
-        degree: "B.A. in Economics",
-        school: "New York University",
-        location: "New York, NY",
+        id: "edu-sales-1",
+        degree: "Bachelor of Business Administration (BBA - Marketing)",
+        school: "Lucknow University",
+        location: "Lucknow",
         year: "2020",
-      }
+      },
     ],
-    skills: ["Product Roadmap", "Agile / Scrum", "A/B Testing", "Data Analysis", "User Research"],
-    analysis: {
-      atsScore: 62,
-      targetRole: "Lead Product Manager",
-      matchAssessment: "Moderate match. Key analytics and business KPI impact metrics are missing.",
-      recommendedKeywords: ["Growth Metrics", "OKR Strategy", "SQL / BigQuery", "PLG (Product-Led Growth)", "GTM Execution"],
-      insights: [
-        {
-          title: "Add Revenue & Retention Impact",
-          description: "Bullets should quantify ARR, DAU/MAU lift, or retention rate shifts.",
-          type: "trending_up"
-        },
-        {
-          title: "Highlight Cross-Functional Leadership",
-          description: "Demonstrate direct ownership of go-to-market strategies.",
-          type: "lightbulb"
-        }
-      ],
-      summaryOptimization: {
-        originalDraft: "Product manager with experience managing roadmaps, leading sprints, and working with engineering and design teams.",
-        aiOptimized: "Data-driven Lead Product Manager with 4+ years spearheading high-growth fintech products. Adept at driving 30%+ retention increases through rigorous A/B experimentation, user discovery, and cross-functional engineering alignment."
-      }
-    }
+    skills: [
+      "B2B & Retail Distribution Sales",
+      "Dealer & Distributor Management",
+      "Territory Planning & Channel Growth",
+      "Lead Generation & Cold Outreach",
+      "CRM & Daily Sales Reporting (DSR)",
+      "Price Negotiation & Closing",
+      "Inventory & Payment Collection Follow-up",
+    ],
+    languages: ["Hindi (Native)", "English (Fluent)"],
   },
-  {
-    id: "res-startup-lead",
-    title: "Startup Tech Lead v2",
-    targetRole: "Founding Engineer / Tech Lead",
-    lastEdited: "Oct 12",
-    updatedAt: Date.now() - 1728000000,
-    atsScore: 91,
-    personal: {
-      firstName: "Marcus",
-      lastName: "Vance",
-      email: "marcus.vance@tech.io",
-      phone: "(555) 789-0123",
-      location: "Austin, TX",
-      linkedin: "https://linkedin.com/in/marcusvance",
-      github: "https://github.com/marcusv",
-      summary: "Entrepreneurial Founding Engineer and Mobile Architect with a history of taking 0-to-1 products to market. Deep expertise in high-throughput microservices and Kotlin multiplatform apps.",
-    },
-    experiences: [
-      {
-        id: "exp-lead-1",
-        title: "Founding Tech Lead",
-        company: "Nexus AI Systems",
-        location: "Austin, TX",
-        startDate: "2022",
-        endDate: "Present",
-        current: true,
-        bullets: [
-          "Built initial real-time mobile app and cloud backend from scratch in 4 months, acquiring 250k MAU in year one.",
-          "Managed team of 8 full-stack and mobile engineers across 2 time zones, maintaining zero Sev-1 incidents.",
-          "Secured Series A funding technical sign-off by passing rigorous enterprise SOC2 security audits."
-        ],
-      }
-    ],
-    education: [
-      {
-        id: "edu-lead-1",
-        degree: "M.S. in Software Engineering",
-        school: "UT Austin",
-        location: "Austin, TX",
-        year: "2018",
-      }
-    ],
-    skills: ["System Architecture", "Kotlin Multiplatform", "Distributed Systems", "Cloud Run", "PostgreSQL", "Team Leadership"],
-    analysis: {
-      atsScore: 91,
-      targetRole: "Founding Engineer / Tech Lead",
-      matchAssessment: "Outstanding match with high-density leadership and technical keywords.",
-      recommendedKeywords: ["K8s", "GraphQL", "Zero Trust Security", "Series A Diligence"],
-      insights: [
-        {
-          title: "Pristine Metric Density",
-          description: "Bullets contain strong outcome-focused percentages and user figures.",
-          type: "check"
-        }
-      ],
-      summaryOptimization: {
-        originalDraft: "Entrepreneurial Founding Engineer and Mobile Architect with a history of taking 0-to-1 products to market.",
-        aiOptimized: "Entrepreneurial Founding Tech Lead with 7+ years architecting scalable 0-to-1 mobile ecosystems. Proven track record scaling platforms to 250k+ MAU, leading elite engineering teams, and driving technical due diligence for institutional funding."
-      }
-    }
-  }
 ];
 
-export const demoAlexChenData = {
-  firstName: "Alex",
-  lastName: "Chen",
-  email: "alex.chen@example.com",
-  phone: "(555) 987-6543",
-  location: "San Francisco, CA",
-  linkedin: "https://linkedin.com/in/alexchen-dev",
-  github: "https://github.com/alexchen",
-  summary: "Experienced Android developer looking for new opportunities. Worked with Java and some Kotlin. Built several apps and published them to the Play Store over the last 5 years."
-};
+export const demoAlexChenData: Resume = sampleResumes[0];

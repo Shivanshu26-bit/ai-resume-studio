@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { Resume, ResumeAnalysis, JobComparisonResult, BottomNavTab } from "../types";
+import { Resume, ResumeAnalysis, JobComparisonResult, BottomNavTab, SUPPORTED_INDUSTRIES, SUPPORTED_LANGUAGES } from "../types";
 import { TopAppBar } from "./TopAppBar";
+import { ResumeUploadModal } from "./ResumeUploadModal";
+import { Sparkles, Briefcase, Globe, CheckCircle2, AlertCircle, UploadCloud, Edit3, ArrowRight, Lightbulb, FileText, Target, Plus, Check } from "lucide-react";
 
 interface AtsScannerScreenProps {
   resumes: Resume[];
@@ -34,6 +36,17 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
   const [targetRoleInput, setTargetRoleInput] = useState<string>(
     activeResume?.targetRole || ""
   );
+
+  const currentSelectedResume =
+    resumes.find((r) => r.id === selectedResumeId) || activeResume || resumes[0];
+
+  const [industry, setIndustry] = useState<string>(
+    currentSelectedResume?.classification?.industry || "Education / Teaching"
+  );
+  const [preferredLanguage, setPreferredLanguage] = useState<string>(
+    currentSelectedResume?.preferredLanguage || currentSelectedResume?.classification?.language || "English"
+  );
+
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [scanError, setScanError] = useState<string>("");
   const [analysisResult, setAnalysisResult] = useState<ResumeAnalysis | null>(
@@ -42,9 +55,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
   const [jobComparison, setJobComparison] = useState<JobComparisonResult | null>(null);
   const [addedSkills, setAddedSkills] = useState<string[]>([]);
   const [showRawSummaryModal, setShowRawSummaryModal] = useState<boolean>(false);
-
-  const currentSelectedResume =
-    resumes.find((r) => r.id === selectedResumeId) || activeResume || resumes[0];
+  const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
 
   const handleResumeSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const id = e.target.value;
@@ -53,6 +64,12 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
     if (found) {
       onSelectResume(found);
       setTargetRoleInput(found.targetRole || "");
+      if (found.classification?.industry) {
+        setIndustry(found.classification.industry);
+      }
+      if (found.preferredLanguage || found.classification?.language) {
+        setPreferredLanguage(found.preferredLanguage || found.classification?.language || "English");
+      }
       if (found.analysis) {
         setAnalysisResult(found.analysis);
       }
@@ -69,12 +86,15 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
     setIsScanning(true);
 
     try {
-      // 1. Run ATS Analysis endpoint
+      // 1. Run ATS Analysis endpoint with industry & language
       const atsRes = await fetch("/api/ai/ats-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           resumeData: currentSelectedResume,
+          targetRole: targetRoleInput.trim() || currentSelectedResume.targetRole,
+          industry,
+          preferredLanguage,
           jobDescription: jobDescription.trim() || undefined,
         }),
       });
@@ -96,6 +116,8 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
             body: JSON.stringify({
               jobDescription: jobDescription.trim(),
               resumeData: currentSelectedResume,
+              industry,
+              preferredLanguage,
             }),
           });
           if (matchRes.ok) {
@@ -113,6 +135,16 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
         atsScore: atsData.atsScore || 80,
         analysis: atsData,
         targetRole: targetRoleInput.trim() || currentSelectedResume.targetRole,
+        preferredLanguage,
+        classification: {
+          ...(currentSelectedResume.classification || {
+            roleLevel: "Experienced",
+            confidence: 0.9,
+          }),
+          industry,
+          profession: targetRoleInput.trim() || currentSelectedResume.targetRole,
+          language: preferredLanguage,
+        },
         lastEdited: "Just now",
         updatedAt: Date.now(),
       };
@@ -156,6 +188,17 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
     setShowRawSummaryModal(false);
   };
 
+  const handleUploadNewSuccess = (newResume: Resume) => {
+    onUpdateResume(newResume);
+    setSelectedResumeId(newResume.id);
+    if (newResume.classification?.industry) {
+      setIndustry(newResume.classification.industry);
+    }
+    if (newResume.preferredLanguage) {
+      setPreferredLanguage(newResume.preferredLanguage);
+    }
+  };
+
   const currentScore = analysisResult?.atsScore || currentSelectedResume?.atsScore || 75;
   const isHighScore = currentScore >= 80;
   const isMediumScore = currentScore >= 65 && currentScore < 80;
@@ -177,24 +220,32 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
           <div>
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center border border-purple-100 shadow-2xs">
-                <span className="material-symbols-outlined text-[22px]">document_scanner</span>
+                <Sparkles className="w-5 h-5" />
               </div>
               <h1 className="text-[24px] md:text-[28px] font-extrabold text-slate-900 tracking-tight">
                 ATS Resume Scanner
               </h1>
             </div>
             <p className="text-[14px] text-slate-600 mt-1">
-              See how well your resume matches a target job.
+              Check ATS match and keyword compatibility across Indian &amp; global professions.
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => setShowUploadModal(true)}
+              className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[13px] font-bold px-3.5 py-2 rounded-full flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+            >
+              <UploadCloud className="w-4 h-4" />
+              Upload Resume
+            </button>
+
             <button
               id="ats-nav-to-builder-btn"
               onClick={() => onNavigateToBuilder(currentSelectedResume)}
               className="bg-white border border-slate-300 hover:border-indigo-500 text-slate-700 hover:text-indigo-600 text-[13px] font-bold px-4 py-2 rounded-full flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[18px]">edit_document</span>
+              <Edit3 className="w-4 h-4" />
               Resume Builder
             </button>
 
@@ -208,7 +259,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                 {isExportingPdf ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+                  <FileText className="w-4 h-4" />
                 )}
                 Export PDF
               </button>
@@ -227,23 +278,18 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
               >
                 1. Select Resume to Scan:
               </label>
-              <div className="relative">
-                <select
-                  id="select-resume-for-scan"
-                  value={selectedResumeId}
-                  onChange={handleResumeSelectChange}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-[14px] text-slate-900 font-semibold focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 appearance-none cursor-pointer"
-                >
-                  {resumes.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.title} ({r.targetRole || "General"} • {r.selectedTemplate || "Modern"})
-                    </option>
-                  ))}
-                </select>
-                <span className="material-symbols-outlined absolute right-3.5 top-3.5 text-slate-400 pointer-events-none text-[20px]">
-                  unfold_more
-                </span>
-              </div>
+              <select
+                id="select-resume-for-scan"
+                value={selectedResumeId}
+                onChange={handleResumeSelectChange}
+                className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-[14px] text-slate-900 font-semibold focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 cursor-pointer"
+              >
+                {resumes.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.title} ({r.targetRole || "General"} • {r.classification?.industry || "Professional"})
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* 2. Target Job Role */}
@@ -252,16 +298,55 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                 htmlFor="target-job-role-input"
                 className="block text-[13px] font-bold text-slate-800 mb-1.5"
               >
-                2. Target Job Title (Optional):
+                2. Target Job Title:
               </label>
               <input
                 id="target-job-role-input"
                 type="text"
-                placeholder="e.g. Senior Frontend Engineer, Product Manager"
+                placeholder="e.g. PGT Hindi Teacher, Senior Accountant, Staff Nurse"
                 value={targetRoleInput}
                 onChange={(e) => setTargetRoleInput(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-[14px] text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
               />
+            </div>
+          </div>
+
+          {/* Industry & Language Settings */}
+          <div className="p-3.5 bg-gradient-to-r from-purple-50/60 via-indigo-50/40 to-slate-50 border border-purple-100 rounded-2xl grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5 mb-1">
+                <Briefcase className="w-3.5 h-3.5 text-purple-600" />
+                Industry / Domain Focus
+              </label>
+              <select
+                value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-[12.5px] text-slate-800 font-medium outline-hidden focus:border-purple-600"
+              >
+                {SUPPORTED_INDUSTRIES.map((ind) => (
+                  <option key={ind} value={ind}>
+                    {ind}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5 mb-1">
+                <Globe className="w-3.5 h-3.5 text-purple-600" />
+                Language Context
+              </label>
+              <select
+                value={preferredLanguage}
+                onChange={(e) => setPreferredLanguage(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-[12.5px] text-slate-800 font-medium outline-hidden focus:border-purple-600"
+              >
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <option key={lang.code} value={lang.label.split(" ")[0]}>
+                    {lang.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -272,7 +357,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                 htmlFor="job-description-scanner-textarea"
                 className="text-[13px] font-bold text-slate-800"
               >
-                3. Paste Target Job Description (Recommended for Keyword Match):
+                3. Paste Target Job Description / Notification (Optional):
               </label>
               <span className="text-[11px] text-slate-500 font-mono">
                 {jobDescription.length} characters
@@ -280,17 +365,17 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
             </div>
             <textarea
               id="job-description-scanner-textarea"
-              rows={5}
-              placeholder="Paste the job requirements, qualifications, and responsibilities here to calculate exact keyword alignment..."
+              rows={4}
+              placeholder="Paste job posting, teaching recruitment notice, hospital requirements, or tender description to calculate exact match %..."
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-2xl p-4 text-[13.5px] text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 leading-relaxed font-sans"
+              className="w-full bg-slate-50 border border-slate-300 rounded-2xl p-3.5 text-[13px] text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 leading-relaxed font-sans"
             />
           </div>
 
           {scanError && (
             <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-[13px] font-medium flex items-center gap-2">
-              <span className="material-symbols-outlined text-[20px]">error</span>
+              <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{scanError}</span>
             </div>
           )}
@@ -298,10 +383,8 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
           {/* Scan Action Button */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
             <div className="text-[12px] text-slate-500 flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[16px] text-indigo-600">
-                verified_user
-              </span>
-              <span>Factual guardrails: ATS keyword matching without hallucinated metrics</span>
+              <CheckCircle2 className="w-4 h-4 text-purple-600" />
+              <span>Factual guardrails: Domain-specific ATS keyword matching without hallucinated metrics</span>
             </div>
 
             <button
@@ -317,7 +400,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
+                  <Sparkles className="w-4 h-4" />
                   <span>Run ATS Scan</span>
                 </>
               )}
@@ -327,12 +410,12 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
 
         {/* Scan Results View */}
         {analysisResult && (
-          <section className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <section className="flex flex-col gap-6 animate-scale-up">
             {/* Score & Verdict Card */}
             <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-5">
                 {/* Circular Gauge */}
-                <div className="relative w-28 h-28 flex-shrink-0 flex items-center justify-center">
+                <div className="relative w-28 h-28 shrink-0 flex items-center justify-center">
                   <svg
                     className="absolute inset-0 w-full h-full transform -rotate-90"
                     viewBox="0 0 36 36"
@@ -369,7 +452,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span
                       className={`px-3 py-1 rounded-full text-[12px] font-bold font-mono border ${
                         isHighScore
@@ -385,9 +468,14 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                         ? "Moderate Match"
                         : "Needs Improvement"}
                     </span>
-                    <span className="bg-slate-100 text-slate-600 text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full">
-                      AI Estimate
+                    <span className="bg-purple-50 text-purple-700 border border-purple-200 text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full">
+                      {industry}
                     </span>
+                    {preferredLanguage && preferredLanguage !== "English" && (
+                      <span className="bg-orange-50 text-orange-700 border border-orange-200 text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full">
+                        {preferredLanguage}
+                      </span>
+                    )}
                   </div>
 
                   <h3 className="text-[18px] font-bold text-slate-900 mt-1">
@@ -395,7 +483,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                   </h3>
                   <p className="text-[13px] text-slate-600 leading-relaxed max-w-md">
                     {analysisResult.matchAssessment ||
-                      "Your resume has been evaluated across readability, keyword alignment, and formatting structure."}
+                      "Your resume has been evaluated across readability, domain keyword alignment, and formatting structure."}
                   </p>
                   <p className="text-[11px] text-slate-600 font-mono mt-0.5">
                     * AI estimate based on content structure; not an official score from any commercial ATS vendor.
@@ -404,13 +492,13 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
               </div>
 
               {/* Action: Improve Resume in Builder */}
-              <div className="flex flex-col sm:flex-row md:flex-col gap-2 w-full md:w-auto flex-shrink-0">
+              <div className="flex flex-col sm:flex-row md:flex-col gap-2 w-full md:w-auto shrink-0">
                 <button
                   id="ats-improve-resume-btn"
                   onClick={() => onNavigateToBuilder(currentSelectedResume)}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold px-6 py-3 rounded-full shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[18px]">edit</span>
+                  <Edit3 className="w-4 h-4" />
                   Improve Resume
                 </button>
 
@@ -419,7 +507,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                     onClick={() => setShowRawSummaryModal(true)}
                     className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[13px] font-bold px-4 py-2.5 rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
+                    <Sparkles className="w-4 h-4" />
                     View AI Summary
                   </button>
                 )}
@@ -445,7 +533,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                 </div>
 
                 <p className="text-[12px] text-slate-500">
-                  Skills and terminology recognized by parsing engines:
+                  Skills and terminology recognized for {industry}:
                 </p>
 
                 <div className="flex flex-wrap gap-1.5">
@@ -458,7 +546,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                       key={kw}
                       className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[12px] font-mono font-medium px-3 py-1 rounded-full flex items-center gap-1"
                     >
-                      <span className="material-symbols-outlined text-[13px]">check</span>
+                      <Check className="w-3.5 h-3.5" />
                       {kw}
                     </span>
                   ))}
@@ -505,9 +593,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                             : "bg-slate-50 hover:bg-purple-50 text-purple-700 border-slate-200 hover:border-purple-300"
                         }`}
                       >
-                        <span className="material-symbols-outlined text-[14px]">
-                          {isAlreadyAdded ? "done" : "add"}
-                        </span>
+                        {isAlreadyAdded ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                         {kw}
                       </button>
                     );
@@ -520,9 +606,7 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
             {analysisResult.insights && analysisResult.insights.length > 0 && (
               <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col gap-4">
                 <h4 className="text-[16px] font-bold text-slate-900 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-purple-600 text-[22px]">
-                    lightbulb
-                  </span>
+                  <Lightbulb className="w-5 h-5 text-purple-600" />
                   Strategic ATS Alignment Recommendations
                 </h4>
 
@@ -532,14 +616,8 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                       key={idx}
                       className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-start gap-3"
                     >
-                      <span className="p-2 rounded-xl bg-white text-purple-600 shadow-2xs border border-slate-100 flex-shrink-0">
-                        <span className="material-symbols-outlined text-[20px]">
-                          {insight.type === "check"
-                            ? "task_alt"
-                            : insight.type === "sort_by_alpha"
-                            ? "format_align_left"
-                            : "trending_up"}
-                        </span>
+                      <span className="p-2 rounded-xl bg-white text-purple-600 shadow-2xs border border-slate-100 shrink-0">
+                        <Target className="w-4 h-4" />
                       </span>
                       <div>
                         <h5 className="text-[13.5px] font-bold text-slate-900">
@@ -563,14 +641,14 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
             <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 flex flex-col gap-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-[18px] font-bold text-slate-900 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-indigo-600">auto_awesome</span>
+                  <Sparkles className="w-5 h-5 text-indigo-600" />
                   ATS-Optimized Executive Summary
                 </h3>
                 <button
                   onClick={() => setShowRawSummaryModal(false)}
                   className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[18px]">close</span>
+                  ✕
                 </button>
               </div>
 
@@ -594,6 +672,15 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
               </div>
             </div>
           </div>
+        )}
+
+        {/* Upload Modal */}
+        {showUploadModal && (
+          <ResumeUploadModal
+            isOpen={showUploadModal}
+            onClose={() => setShowUploadModal(false)}
+            onUploadSuccess={handleUploadNewSuccess}
+          />
         )}
       </main>
     </div>
