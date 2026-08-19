@@ -445,8 +445,8 @@ export const AtsScannerScreen: React.FC<AtsScannerScreenProps> = ({
                     <span className="text-[28px] font-extrabold text-slate-900 leading-none">
                       {currentScore}%
                     </span>
-                    <span className="text-[10px] uppercase font-mono font-bold text-slate-500 mt-1">
-                      Score
+                    <span className="text-[9.5px] uppercase font-mono font-bold text-slate-500 mt-1">
+                      AI Estimate
                     </span>
                   </div>
                 </div>
